@@ -174,35 +174,13 @@
       text-align: center;
       font-size: 10.5px;
     }
-
-    /* =========================
-       Column group separators (FIXED)
-       원하는 그룹:
-       [시간 | 월수금,화목토] / [매일반,월수금단과,화목토단과,실제인원] / [장기,단기]
-       ========================= */
-
-    /* 1) 헤더 1행(그룹명 행)에는 구분선이 생기지 않게 */
-    thead tr:first-child th {
-      border-right: none !important;
-    }
-
-    /* 2) 헤더 2행(실제 컬럼명 행)에서만 구분선 위치 지정
-       - 이 행에는 '시간'이 없고(위에서 rowspan), 총 8개 th
-         1: 월수금, 2: 화목토, 3: 매일반, 4: 월수금 단과, 5: 화목토 단과, 6: 실제 인원, 7: 장기, 8: 단기
-       - 구분선은 2(화목토) 뒤, 6(실제 인원) 뒤
-    */
-    thead tr:nth-child(2) th:nth-child(2),
-    thead tr:nth-child(2) th:nth-child(6) {
+    
+    /* Column group separators */
+    th:nth-child(3), td:nth-child(3) {
       border-right: 2px solid rgba(149, 165, 166, 0.4);
     }
-
-    /* 3) 본문/합계행은 실제 컬럼이 9개(시간 포함)
-       - 3(화목토) 뒤, 7(실제 인원) 뒤
-    */
-    tbody td:nth-child(3),
-    tfoot td:nth-child(3),
-    tbody td:nth-child(7),
-    tfoot td:nth-child(7) {
+    
+    th:nth-child(7), td:nth-child(7) {
       border-right: 2px solid rgba(149, 165, 166, 0.4);
     }
     
@@ -655,6 +633,7 @@
             color: '#fff',
             font: { size: 10, weight: 'bold' },
             formatter: (value, ctx) => {
+              const datasetIndex = ctx.datasetIndex;
               const dataIndex = ctx.dataIndex;
               const d = timeData[dataIndex];
               const total = d.unique;
