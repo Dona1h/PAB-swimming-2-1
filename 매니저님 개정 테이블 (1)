@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAB 수영장 매니저 급여 및 근무시간 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .header-info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .header-info-item strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.5em;
+        }
+
+        .timeline-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .timeline-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .chart-container-small {
+            position: relative;
+            height: 150px;
+            margin: 20px 0;
+        }
+
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .chart-container-small {
+            position: relative;
+            height: 150px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏊‍♂️ PAB 수영장 매니저 급여 및 근무시간 대시보드</h1>
+            <div class="subtitle">2026년 3월 개정 기준</div>
+            
+            <div class="header-info">
+                <div class="header-info-item">
+                    <strong>최저시급</strong>
+                    10,320원 (2026년)
+                </div>
+                <div class="header-info-item">
+                    <strong>사업장 규모</strong>
+                    상시 5인 이상 (연장·야간 가산 적용)
+                </div>
+                <div class="header-info-item">
+                    <strong>월 환산</strong>
+                    52주/12개월 = 4.3333주/월
+                </div>
+                <div class="header-info-item">
+                    <strong>파트 토요일</strong>
+                    실제 횟수만큼 추가 지급
+                </div>
+                <div class="header-info-item">
+                    <strong>실장 토요일</strong>
+                    격주 고정 (1,3주 또는 2,4주)
+                </div>
+            </div>
+        </div>
+
+        <!-- 평일 근무시간 타임라인 -->
+        <div class="card full-width">
+            <h2>📅 평일 근무시간 타임라인</h2>
+            <div class="chart-container">
+                <canvas id="weekdayChart"></canvas>
+            </div>
+            <div class="info-box">
+                <strong>🔄 인수인계 구간:</strong><br>
+                • 오전 파트 ↔ 실장: 9:25~9:40 (15분)<br>
+                • 실장 ↔ 오후 파트: 18:10~18:25 (15분)
+            </div>
+            <div class="highlight">
+                <strong>☕ 휴게시간:</strong><br>
+                • 오전 파트: 8:20~8:30 (10분, 무급)<br>
+                • 실장: 14:30~15:30 (1시간, 무급)<br>
+                • 오후 파트: 21:30~21:40 (10분, 무급)
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- 주말 근무시간 타임라인 -->
+            <div class="card">
+                <h2>📅 주말(토요일) 근무시간</h2>
+                <div class="chart-container-small">
+                    <canvas id="weekendChart"></canvas>
+                </div>
+                <div class="highlight">
+                    <strong>☕ 휴게시간:</strong> 6:20~6:30, 8:20~8:30, 10:20~10:30 (각 10분, 총 30분 무급)
+                </div>
+            </div>
+        </div>
+
+        <!-- 유급 근로시간 산정 -->
+        <div class="card full-width">
+            <h2>⏱️ 유급 근로시간 산정</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>배치/체류</th>
+                        <th>무급휴게</th>
+                        <th>유급 근로시간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>파트 (평일)</strong></td>
+                        <td>4:00 체류</td>
+                        <td>0:10 (중간 1회)</td>
+                        <td><strong>3:50 (3.8333h)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>실장 (평일)</strong></td>
+                        <td>9:25 ~ 18:25</td>
+                        <td>1:00</td>
+                        <td><strong>8:00 (8.0h)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>토요일 (공통)</strong></td>
+                        <td>총 5:00 근무</td>
+                        <td>0:30 (중간 1회)</td>
+                        <td><strong>4:30 (4.5h)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 급여 산출표 -->
+        <div class="card full-width">
+            <h2>💰 급여 산출표 (세전)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>월 고정분</th>
+                        <th>토요일 1회당</th>
+                        <th>월급 산식</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>오전 파트</strong></td>
+                        <td>1,065,827원</td>
+                        <td>49,307원</td>
+                        <td>1,065,827 + (토 실제횟수 × 49,307)</td>
+                        <td>평일 야간: 05:40~06:00 (20분)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>오후 파트</strong></td>
+                        <td>1,047,193원</td>
+                        <td>49,307원</td>
+                        <td>1,047,193 + (토 실제횟수 × 49,307)</td>
+                        <td>평일 야간: 22:00~22:10 (10분)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>실장</strong></td>
+                        <td>2,146,560원</td>
+                        <td>65,360원</td>
+                        <td>2,146,560 + (토 실제횟수 × 65,360)</td>
+                        <td>토요일: 주40 초과 4.5h 연장가산</td>
+                    </tr>
+                    <tr style="background-color: #f0f8ff;">
+                        <td><strong>실장 (월평균)</strong></td>
+                        <td colspan="2">연 26회(격주) 평균</td>
+                        <td><strong>약 2,288,173원/월</strong></td>
+                        <td>52주/12개월 환산</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 급여 산식 상세 -->
+        <div class="card full-width">
+            <h2>🧮 급여 산식 상세 (검증용)</h2>
+            
+            <div class="timeline-container">
+                <div class="timeline-title">📊 파트 급여 계산</div>
+                <ul>
+                    <li><strong>월 고정분 기본급:</strong> [(3.8333h × 5일) + 주휴 3.8333h] × 4.3333주 × 10,320원 = <strong>1,028,560원</strong></li>
+                    <li><strong>오전 파트 평일 야간가산 (50%):</strong> (0.3333h × 5일 × 4.3333주) × 10,320원 × 0.5 = <strong>37,267원</strong></li>
+                    <li><strong>오후 파트 평일 야간가산 (50%):</strong> (0.1667h × 5일 × 4.3333주) × 10,320원 × 0.5 = <strong>18,633원</strong></li>
+                </ul>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-title">📊 파트 토요일 1회당</div>
+                <ul>
+                    <li>기본급: 4.5h × 10,320원 = <strong>46,440원</strong></li>
+                    <li>토요일 야간가산: 0.3333h × 10,320원 × 0.5 = <strong>1,720원</strong></li>
+                    <li>주휴 증분 (약 6분 40초) = <strong>1,147원</strong></li>
+                    <li><strong>합계: 49,307원</strong></li>
+                </ul>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-title">📊 실장 급여 계산</div>
+                <ul>
+                    <li><strong>월 고정분:</strong> [(8.0h × 5일) + 주휴 8.0h] × 4.3333주 × 10,320원 = <strong>2,146,560원</strong></li>
+                </ul>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-title">📊 실장 토요일 1회당</div>
+                <ul>
+                    <li>기본급: 4.5h × 10,320원 = <strong>46,440원</strong></li>
+                    <li>토요일 야간가산: 0.3333h × 10,320원 × 0.5 = <strong>1,720원</strong></li>
+                    <li>연장가산 (주40 초과): 4.5h × 10,320원 × 0.5 = <strong>23,220원</strong></li>
+                    <li>주휴 조정분 = <strong>-6,020원</strong></li>
+                    <li><strong>합계: 65,360원</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 법적 주의사항 -->
+        <div class="card full-width">
+            <h2>⚖️ 운영상 법적 주의사항</h2>
+            
+            <div class="warning-box">
+                <h3>🔴 필수 준수사항</h3>
+                <ul>
+                    <li><strong>무급휴게 (토요일 30분 포함):</strong> "자유이용" 보장 필수 → 대기/감시/콜 대응이 붙으면 근로시간으로 판단될 위험</li>
+                    <li><strong>주휴수당 및 지각·조퇴:</strong> 1주 소정근로일 개근 요건 충족 시 발생. 지각·조퇴는 원칙적으로 결근으로 간주하지 않는 방향의 행정해석이 다수</li>
+                    <li><strong>토요일 근무:</strong> 계약 시 근무일을 월~토로 편성하는 경우 휴일근로 가산(50%) 없음, 주 40시간 초과분만 연장가산 처리 가능</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 시간을 숫자로 변환하는 함수 (5:40 -> 5.67)
+        function timeToDecimal(hour, minute) {
+            return hour + (minute / 60);
+        }
+
+        // 대각선 패턴 생성 함수 (휴게시간용)
+        function createDiagonalPattern(color) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 10;
+            canvas.height = 10;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 10, 10);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 10);
+            ctx.lineTo(10, 0);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(-5, 5);
+            ctx.lineTo(5, -5);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(5, 15);
+            ctx.lineTo(15, 5);
+            ctx.stroke();
+            
+            return ctx.createPattern(canvas, 'repeat');
+        }
+
+        // 평일 근무시간 타임라인
+        const weekdayCtx = document.getElementById('weekdayChart').getContext('2d');
+        
+        new Chart(weekdayCtx, {
+            type: 'bar',
+            data: {
+                labels: ['오전 파트', '인수인계', '실장', '인수인계', '오후 파트'],
+                datasets: [
+                    // 오전 파트 근무시간
+                    {
+                        label: '오전 파트 근무',
+                        data: [[timeToDecimal(5, 40), timeToDecimal(9, 40)], null, null, null, null],
+                        backgroundColor: 'rgba(255, 159, 64, 0.9)',
+                        borderColor: 'rgb(255, 159, 64)',
+                        borderWidth: 2
+                    },
+                    // 오전 파트 휴게시간
+                    {
+                        label: '휴게시간',
+                        data: [[timeToDecimal(8, 20), timeToDecimal(8, 30)], null, null, null, null],
+                        backgroundColor: createDiagonalPattern('rgb(255, 99, 132)'),
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2
+                    },
+                    // 인수인계 1: 오전 (실장 바로 위)
+                    {
+                        label: '인수인계 (9:25~9:40 / 18:10~18:25)',
+                        data: [null, [timeToDecimal(9, 25), timeToDecimal(9, 40)], null, null, null],
+                        backgroundColor: 'rgba(255, 206, 86, 0.9)',
+                        borderColor: 'rgb(255, 193, 37)',
+                        borderWidth: 3
+                    },
+                    // 실장 근무시간
+                    {
+                        label: '실장 근무',
+                        data: [null, null, [timeToDecimal(9, 25), timeToDecimal(18, 25)], null, null],
+                        backgroundColor: 'rgba(75, 192, 192, 0.9)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2
+                    },
+                    // 실장 휴게시간
+                    {
+                        label: '휴게시간 (실장)',
+                        data: [null, null, [timeToDecimal(14, 30), timeToDecimal(15, 30)], null, null],
+                        backgroundColor: createDiagonalPattern('rgb(255, 99, 132)'),
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2
+                    },
+                    // 인수인계 2: 오후 (실장 바로 아래)
+                    {
+                        label: '인수인계 2',
+                        data: [null, null, null, [timeToDecimal(18, 10), timeToDecimal(18, 25)], null],
+                        backgroundColor: 'rgba(255, 206, 86, 0.9)',
+                        borderColor: 'rgb(255, 193, 37)',
+                        borderWidth: 3
+                    },
+                    // 오후 파트 근무시간
+                    {
+                        label: '오후 파트 근무',
+                        data: [null, null, null, null, [timeToDecimal(18, 10), timeToDecimal(22, 10)]],
+                        backgroundColor: 'rgba(153, 102, 255, 0.9)',
+                        borderColor: 'rgb(153, 102, 255)',
+                        borderWidth: 2
+                    },
+                    // 오후 파트 휴게시간
+                    {
+                        label: '휴게시간 (오후)',
+                        data: [null, null, null, null, [timeToDecimal(21, 30), timeToDecimal(21, 40)]],
+                        backgroundColor: createDiagonalPattern('rgb(255, 99, 132)'),
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 10,
+                            font: {
+                                size: 11
+                            },
+                            filter: function(item, chart) {
+                                // 중복 범례 제거
+                                if (item.text === '인수인계 2') return false;
+                                if (item.text === '휴게시간 (실장)' || item.text === '휴게시간 (오후)') return false;
+                                return true;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '평일 운영 타임라인 (5:40 ~ 22:10)',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: 15
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (!context.raw) return '';
+                                const start = context.raw[0];
+                                const end = context.raw[1];
+                                const startHour = Math.floor(start);
+                                const startMin = Math.round((start - startHour) * 60);
+                                const endHour = Math.floor(end);
+                                const endMin = Math.round((end - endHour) * 60);
+                                const duration = end - start;
+                                const durationMin = Math.round(duration * 60);
+                                
+                                let label = context.dataset.label;
+                                if (label === '인수인계 2') label = '인수인계';
+                                if (label === '휴게시간 (실장)' || label === '휴게시간 (오후)') label = '휴게시간';
+                                
+                                return `${label}: ${startHour}:${startMin.toString().padStart(2, '0')} ~ ${endHour}:${endMin.toString().padStart(2, '0')} (${durationMin}분)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 5,
+                        max: 23,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return value + ':00';
+                            },
+                            font: {
+                                size: 11
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '시간 (24시간 기준)',
+                            font: {
+                                size: 13,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            lineWidth: 1
+                        }
+                    },
+                    y: {
+                        stacked: false,
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // 주말 근무시간 차트
+        const weekendCtx = document.getElementById('weekendChart').getContext('2d');
+        new Chart(weekendCtx, {
+            type: 'bar',
+            data: {
+                labels: ['토요일'],
+                datasets: [
+                    {
+                        label: '근무시간',
+                        data: [[timeToDecimal(5, 40), timeToDecimal(10, 40)]],
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: '휴게시간',
+                        data: [[timeToDecimal(6, 20), timeToDecimal(10, 30)]],
+                        backgroundColor: 'rgba(255, 99, 132, 0)',
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        segments: {
+                            borderColor: ctx => {
+                                const value = ctx.p0.parsed.x;
+                                if ((value >= timeToDecimal(6, 20) && value <= timeToDecimal(6, 30)) ||
+                                    (value >= timeToDecimal(8, 20) && value <= timeToDecimal(8, 30)) ||
+                                    (value >= timeToDecimal(10, 20) && value <= timeToDecimal(10, 30))) {
+                                    return 'rgb(255, 99, 132)';
+                                }
+                                return 'transparent';
+                            }
+                        }
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: '주말 근무 타임라인 (5:40 ~ 10:40)',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.datasetIndex === 0) {
+                                    return '근무: 5:40 ~ 10:40 (총 5시간, 유급 4.5시간)';
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 5,
+                        max: 11,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ':00';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '시간'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
