@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PAB 커뮤니케이션</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--sky:#0ea5e9;--sky-d:#0284c7;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--slate:#64748b;--bg:#f1f5f9;--card:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#64748b;--radius:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit;font-size:inherit}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:70px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:10px;border:none;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;gap:6px}
+.btn-primary{background:var(--sky);color:#fff}.btn-primary:active{background:var(--sky-d)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-block{width:100%;padding:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;transition:border .2s;background:#fff}
+.input:focus{outline:none;border-color:var(--sky)}
+select.input{-webkit-appearance:none;appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center #fff}
+textarea.input{resize:vertical;min-height:80px}
+.label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-group{margin-bottom:14px}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);padding:0 16px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:54px}
+.header h1{font-size:16px;font-weight:700}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:none;background:none;font-size:10px;color:var(--text2);cursor:pointer;position:relative}
+.nav button.active{color:var(--sky);font-weight:700}
+.nav button .icon{font-size:20px}
+.nav .notif{position:absolute;top:4px;right:50%;margin-right:-14px;width:16px;height:16px;background:var(--red);color:#fff;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.content{padding:16px}
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s}
+.urgency-select{display:flex;gap:8px}
+.urgency-opt{flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.urgency-opt.selected{border-color:currentColor;transform:scale(1.03)}
+.report-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;transition:background .2s}
+.report-item:active{background:#f1f5f9}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{padding:14px;border-radius:var(--radius);text-align:center}
+.stat-card .value{font-size:24px;font-weight:800}
+.stat-card .label{font-size:11px;color:var(--text2);margin-top:2px}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.tab-bar{display:flex;gap:4px;padding:4px;background:#f1f5f9;border-radius:10px;margin-bottom:16px}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;white-space:nowrap}
+.tab-btn.active{background:#fff;color:var(--sky);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:200;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .15s;background:#fff}
+.check-item:active{transform:scale(.98)}
+.check-item.checked{background:#F0FDF4;border-color:#86efac}
+.check-item .check-box{width:22px;height:22px;border-radius:6px;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:13px}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green);color:#fff}
+.check-item .check-label{font-size:13px;flex:1;line-height:1.4}
+.check-item.checked .check-label{color:var(--text2);text-decoration:line-through}
+.section-header{font-size:13px;font-weight:700;color:var(--text2);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.photo-thumb{width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover;border:1px solid var(--border)}
+.photo-add{width:100%;aspect-ratio:1;border-radius:8px;border:2px dashed #cbd5e1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:24px;color:#94a3b8;transition:all .2s;background:#f8fafc}
+.photo-add:active{background:#e2e8f0}
+.photo-add span{font-size:10px;margin-top:2px}
+.photo-wrap{position:relative}
+.photo-del{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.zone-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;background:#fff}
+.zone-header{padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#fafbfc}
+.zone-header .count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.zone-body{padding:8px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useMemo,useRef} = React;
+
+// ═══════════════════════════════════════════════════
+// DATA & CONFIG
+// ═══════════════════════════════════════════════════
+const STAFF = [
+  {id:'swim_am',name:'성인 오전담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'swim_pm',name:'성인 오후담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'swim_kids',name:'키즈담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'mgr_chief',name:'매니저 실장',dept:'매니저팀',role:'staff',formType:'manager'},
+  {id:'mgr_am',name:'오전 파트매니저',dept:'매니저팀',role:'staff',formType:'handover'},
+  {id:'mgr_pm',name:'오후 파트매니저',dept:'매니저팀',role:'staff',formType:'handover'},
+  {id:'clean',name:'미화 담당',dept:'미화팀',role:'staff',formType:'cleaning'},
+  {id:'machine',name:'기관장',dept:'기계팀',role:'staff',formType:'machine'},
+  {id:'lead',name:'운영팀장 (보형)',dept:'운영',role:'lead',formType:null},
+  {id:'exec1',name:'대표',dept:'운영진',role:'exec',formType:null},
+  {id:'exec2',name:'이사',dept:'운영진',role:'exec',formType:null},
+];
+
+const DEPT_COLORS = {
+  '수영팀':'#10b981','매니저팀':'#f59e0b','미화팀':'#8b5cf6','기계팀':'#ef4444','운영':'#0ea5e9','운영진':'#6366f1'
+};
+
+const REPORT_DEADLINES = {
+  machine:'09:00', clean:'09:30', swim_am:'14:00', swim_pm:'18:00', swim_kids:'18:00', mgr_chief:'18:00'
+};
+
+// ═══════════════════════════════════════════════════
+// 미화 체크리스트 데이터 (매뉴얼 기반)
+// ═══════════════════════════════════════════════════
+const CLEAN_CHECKLIST = {
+  hourly: {
+    label: '항시 점검 (매시간)',
+    icon: '🔄',
+    color: '#ef4444',
+    items: [
+      {id:'h1', zone:'계단/로비', text:'바닥 물기 제거'},
+      {id:'h2', zone:'계단/로비', text:'바닥 먼지 및 오염물 제거'},
+      {id:'h3', zone:'계단/로비', text:'안전 상태 점검 (결빙/미끄러움/장애물)'},
+      {id:'h4', zone:'탈의실', text:'바닥 타일 이물질 유무 확인'},
+      {id:'h5', zone:'탈의실', text:'바닥 미끄럼 여부 확인'},
+      {id:'h6', zone:'탈의실', text:'머리카락 청소'},
+      {id:'h7', zone:'탈의실', text:'녹/날카로운 부분 여부 확인'},
+      {id:'h8', zone:'샤워실', text:'바닥 물기 제거'},
+      {id:'h9', zone:'화장실', text:'문 손잡이/걸쇠 정상 작동 확인'},
+      {id:'h10', zone:'화장실', text:'날카로운 이물질 여부 확인'},
+    ]
+  },
+  daily: {
+    label: '일일 체크리스트 (출근/퇴근)',
+    icon: '📋',
+    color: '#0ea5e9',
+    items: [
+      {id:'d1', zone:'입구/중간문', text:'입구 계단 전체 청소'},
+      {id:'d2', zone:'입구/중간문', text:'중간문 공간 청소 (악취관리, 바닥)'},
+      {id:'d3', zone:'탈의실', text:'발수건 세탁 및 교체'},
+      {id:'d4', zone:'탈의실', text:'사물함 내부 먼지/쓰레기 정리'},
+      {id:'d5', zone:'탈의실', text:'선풍기/헤어드라이어 먼지 제거'},
+      {id:'d6', zone:'탈의실', text:'쓰레기통 비우기'},
+      {id:'d7', zone:'탈의실', text:'정수기 컵 관리'},
+      {id:'d8', zone:'샤워실', text:'하수구 청결 관리'},
+      {id:'d9', zone:'샤워실', text:'전체 바닥 물&세제 청소'},
+      {id:'d10', zone:'샤워실', text:'거울 물때 제거'},
+      {id:'d11', zone:'샤워실', text:'바닥 상태 점검'},
+      {id:'d12', zone:'샤워실', text:'쓰레기통 비우기'},
+      {id:'d13', zone:'샤워실', text:'물품 보관대 청결 유지'},
+      {id:'d14', zone:'화장실', text:'소변기/좌변기 청소 및 막힘 해결'},
+      {id:'d15', zone:'화장실', text:'세면대/거울 청소'},
+      {id:'d16', zone:'화장실', text:'전체 바닥 물청소'},
+      {id:'d17', zone:'화장실', text:'하수구 관리 / 악취 관리'},
+      {id:'d18', zone:'화장실', text:'쓰레기통 비우기'},
+      {id:'d19', zone:'수영장', text:'중간문 신발장 먼지/흙 제거 및 신발 정리'},
+      {id:'d20', zone:'수영장', text:'청소 도구함 주변 정리'},
+      {id:'d21', zone:'수영장', text:'유리문 경첩 녹 관리, 유리 관리'},
+      {id:'d22', zone:'수영장', text:'바닥 발판 관리'},
+      {id:'d23', zone:'지하', text:'기계실 복도 계단 먼지 청소'},
+      {id:'d24', zone:'지하', text:'약품 보관실 바닥 청소'},
+    ]
+  },
+  weekly: {
+    label: '주간 체크리스트 (주 1회)',
+    icon: '📅',
+    color: '#8b5cf6',
+    items: [
+      {id:'w1', zone:'샤워실', text:'타일 곰팡이 제거'},
+      {id:'w2', zone:'수영장', text:'커튼 곰팡이 관리'},
+      {id:'w3', zone:'수영장', text:'바닥 물때/줄눈 곰팡이/오염 제거'},
+      {id:'w4', zone:'수영장', text:'바닥 타일 상태 점검 (깨짐/벗겨짐)'},
+      {id:'w5', zone:'수영장', text:'다이빙 대 녹/곰팡이 제거'},
+      {id:'w6', zone:'수영장', text:'내부 사무실 문틀 녹/곰팡이 제거'},
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// 매니저 퇴근전 체크리스트 (매뉴얼 기반)
+// ═══════════════════════════════════════════════════
+const MGR_CHECKLIST = [
+  {id:'mc1', text:'카카오비즈니스 답장 완료 여부 확인'},
+  {id:'mc2', text:'자리 정리'},
+  {id:'mc3', text:'정산 확인 후 오전/오후 정산 마감'},
+  {id:'mc4', text:'비품 소진 전 팀장님께 물품 신청'},
+  {id:'mc5', text:'오늘 날짜 신청서 → 오른쪽(당월) 이동'},
+  {id:'mc6', text:'분실물 보관함 확인 (월요일)'},
+  {id:'mc7', text:'만료 락커(파란색) 안내 확인'},
+];
+
+// localStorage helpers
+const DB = {
+  get(key, def=null){ try{const v=localStorage.getItem('pab_'+key);return v?JSON.parse(v):def}catch{return def} },
+  set(key, val){ try{localStorage.setItem('pab_'+key, JSON.stringify(val))}catch{} },
+  today(){ return new Date().toISOString().slice(0,10) },
+  now(){ return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) },
+  todayLabel(){ return new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'}) }
+};
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function Toast({msg, type='success', onClose}){
+  useEffect(()=>{const t=setTimeout(onClose,2500);return()=>clearTimeout(t)},[]);
+  const bg = type==='success'?'#10b981':type==='error'?'#ef4444':'#0ea5e9';
+  return <div className="toast" style={{background:bg}}>{msg}</div>;
+}
+
+// ═══════════════════════════════════════════════════
+// URGENCY SELECTOR
+// ═══════════════════════════════════════════════════
+function UrgencySelect({value, onChange}){
+  return (
+    <div className="form-group">
+      <label className="label">긴급도</label>
+      <div className="urgency-select">
+        {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+          <div key={k} className={`urgency-opt ${value===k?'selected':''}`}
+            style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+              borderColor:value===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+            onClick={()=>onChange(k)}>{l}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════
+function LoginScreen({onLogin}){
+  const [selected, setSelected] = useState('');
+  return (
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',justifyContent:'center',padding:'24px'}}>
+      <div style={{textAlign:'center',marginBottom:40}}>
+        <div style={{fontSize:48,marginBottom:12}}>🏊</div>
+        <h1 style={{fontSize:24,fontWeight:800,color:'var(--sky)'}}>PAB 커뮤니케이션</h1>
+        <p style={{color:'var(--text2)',marginTop:8,fontSize:14}}>수영장 운영 보고 · 소통 시스템</p>
+      </div>
+      <div className="card" style={{padding:24}}>
+        <div className="form-group">
+          <label className="label">이름을 선택하세요</label>
+          <select className="input" value={selected} onChange={e=>setSelected(e.target.value)} style={{fontSize:16}}>
+            <option value="">-- 선택 --</option>
+            <optgroup label="수영팀">
+              {STAFF.filter(s=>s.dept==='수영팀').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="매니저팀">
+              {STAFF.filter(s=>s.dept==='매니저팀').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="시설관리">
+              {STAFF.filter(s=>['미화팀','기계팀'].includes(s.dept)).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="운영">
+              {STAFF.filter(s=>['운영','운영진'].includes(s.dept)).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+          </select>
+        </div>
+        <button className="btn btn-primary btn-block" disabled={!selected} onClick={()=>onLogin(selected)} style={{fontSize:16,padding:16}}>
+          로그인
+        </button>
+      </div>
+      <p style={{textAlign:'center',fontSize:11,color:'#aaa',marginTop:24}}>PAB 커뮤니케이션 v2.0</p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// PHOTO UPLOADER
+// ═══════════════════════════════════════════════════
+function PhotoUploader({photos, onChange, label}){
+  const fileRef = useRef(null);
+
+  const addPhoto = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        // Resize for storage
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max = 800;
+          let w = img.width, h = img.height;
+          if(w > max || h > max){
+            if(w > h){ h = h * max / w; w = max; }
+            else{ w = w * max / h; h = max; }
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          onChange([...photos, {data: dataUrl, time: DB.now(), name: file.name}]);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const removePhoto = (idx) => {
+    onChange(photos.filter((_,i) => i !== idx));
+  };
+
+  return (
+    <div className="form-group">
+      <label className="label">{label || '사진 촬영/업로드'}</label>
+      <div className="photo-grid">
+        {photos.map((p,i) => (
+          <div key={i} className="photo-wrap">
+            <img src={p.data} className="photo-thumb" alt={`사진 ${i+1}`}/>
+            <button className="photo-del" onClick={()=>removePhoto(i)}>×</button>
+          </div>
+        ))}
+        <div className="photo-add" onClick={()=>fileRef.current?.click()}>
+          📷<span>추가</span>
+        </div>
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" multiple
+        style={{display:'none'}} onChange={addPhoto}/>
+      <p style={{fontSize:11,color:'var(--text2)',marginTop:6}}>
+        카메라 촬영 또는 갤러리에서 선택 ({photos.length}장)
+      </p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// REPORT FORMS
+// ═══════════════════════════════════════════════════
+function SwimmingForm({user, onSubmit}){
+  const [data, setData] = useState({attendance:'',classStatus:'정상 진행',complaint:'없음',note:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">출석 인원 (명)</label>
+        <input className="input" type="number" placeholder="예: 45" value={data.attendance} onChange={e=>set('attendance',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">수업 진행 상태</label>
+        <select className="input" value={data.classStatus} onChange={e=>set('classStatus',e.target.value)}>
+          <option>정상 진행</option><option>대체 강사</option><option>휴강</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">민원 유무</label>
+        <select className="input" value={data.complaint} onChange={e=>set('complaint',e.target.value)}>
+          <option>없음</option><option>있음 - 내용 특이사항에 기재</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">특이사항</label>
+        <textarea className="input" placeholder="특이사항을 입력하세요 (없으면 '없음')" value={data.note} onChange={e=>set('note',e.target.value)}/>
+      </div>
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
+      <button className="btn btn-primary btn-block" disabled={!data.attendance}
+        onClick={()=>onSubmit({...data,formType:'swimming'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function ManagerForm({user, onSubmit}){
+  const [data, setData] = useState({sales:'',newReg:'',reReg:'',memberNote:'',facilityNote:'',urgency:'green'});
+  const [checks, setChecks] = useState({});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  const toggleCheck = (id) => setChecks(p=>({...p,[id]:!p[id]}));
+  const checkedCount = MGR_CHECKLIST.filter(c=>checks[c.id]).length;
+
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">오늘 총 매출 (원)</label>
+        <input className="input" type="number" placeholder="예: 1500000" value={data.sales} onChange={e=>set('sales',e.target.value)}/>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+        <div className="form-group">
+          <label className="label">신규 등록 (건)</label>
+          <input className="input" type="number" placeholder="0" value={data.newReg} onChange={e=>set('newReg',e.target.value)}/>
+        </div>
+        <div className="form-group">
+          <label className="label">재등록 (건)</label>
+          <input className="input" type="number" placeholder="0" value={data.reReg} onChange={e=>set('reReg',e.target.value)}/>
+        </div>
+      </div>
+      <div className="form-group">
+        <label className="label">회원 동향 / 민원</label>
+        <textarea className="input" placeholder="회원 동향, 민원, UB 이상 등" value={data.memberNote} onChange={e=>set('memberNote',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">시설 민원 / 비품 현황</label>
+        <textarea className="input" placeholder="없으면 '없음' / 부족 비품 기재" value={data.facilityNote} onChange={e=>set('facilityNote',e.target.value)}/>
+      </div>
+
+      <div className="section-header">✅ 퇴근 전 체크리스트 ({checkedCount}/{MGR_CHECKLIST.length})</div>
+      {MGR_CHECKLIST.map(c=>(
+        <div key={c.id} className={`check-item ${checks[c.id]?'checked':''}`} onClick={()=>toggleCheck(c.id)}>
+          <div className="check-box">{checks[c.id]?'✓':''}</div>
+          <div className="check-label">{c.text}</div>
+        </div>
+      ))}
+
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
+      <button className="btn btn-primary btn-block" disabled={!data.sales} style={{marginTop:12}}
+        onClick={()=>onSubmit({...data,formType:'manager',checklist:checks,checklistDone:checkedCount,checklistTotal:MGR_CHECKLIST.length})}>보고 제출</button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// CLEANING FORM (미화 - 체크리스트 + 사진)
+// ═══════════════════════════════════════════════════
+function CleaningForm({user, onSubmit}){
+  const [tab, setTab] = useState('hourly');
+  const [checks, setChecks] = useState({});
+  const [photos, setPhotos] = useState([]);
+  const [zonePhotos, setZonePhotos] = useState({});
+  const [note, setNote] = useState('');
+  const [urgency, setUrgency] = useState('green');
+  const [openZones, setOpenZones] = useState({});
+
+  const toggleCheck = (id) => setChecks(p=>({...p,[id]:!p[id]}));
+  const toggleZone = (z) => setOpenZones(p=>({...p,[z]:!p[z]}));
+
+  const currentList = CLEAN_CHECKLIST[tab];
+  const zones = [...new Set(currentList.items.map(i=>i.zone))];
+  const totalItems = currentList.items.length;
+  const checkedItems = currentList.items.filter(i=>checks[i.id]).length;
+
+  const allChecked = Object.values(CLEAN_CHECKLIST).reduce((sum, cat) => {
+    return sum + cat.items.filter(i=>checks[i.id]).length;
+  }, 0);
+  const allTotal = Object.values(CLEAN_CHECKLIST).reduce((sum, cat) => sum + cat.items.length, 0);
+
+  const setZonePhoto = (zone, p) => setZonePhotos(prev=>({...prev,[zone]:p}));
+
+  return (
+    <div className="fade-in">
+      <div className="card" style={{padding:12,textAlign:'center',background:'linear-gradient(135deg,#f0f9ff,#faf5ff)'}}>
+        <div style={{fontSize:28,fontWeight:800,color:'var(--purple)'}}>{allChecked}/{allTotal}</div>
+        <div style={{fontSize:12,color:'var(--text2)'}}>전체 점검 완료</div>
+        <div className="progress-bar" style={{marginTop:8}}>
+          <div className="progress-fill" style={{width:`${allChecked/allTotal*100}%`,background:'var(--purple)'}}/>
+        </div>
+      </div>
+
+      <div className="tab-bar">
+        {Object.entries(CLEAN_CHECKLIST).map(([key,cat])=>{
+          const done = cat.items.filter(i=>checks[i.id]).length;
+          return (
+            <button key={key} className={`tab-btn ${tab===key?'active':''}`} onClick={()=>setTab(key)}>
+              {cat.icon} {done}/{cat.items.length}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{fontSize:14,fontWeight:700,marginBottom:10,display:'flex',alignItems:'center',gap:6}}>
+        <span style={{color:currentList.color}}>{currentList.icon}</span> {currentList.label}
+        <span className="badge" style={{background:checkedItems===totalItems?'#D1FAE5':'#FEF3C7',
+          color:checkedItems===totalItems?'var(--green)':'var(--amber)',marginLeft:'auto'}}>
+          {checkedItems}/{totalItems}
+        </span>
+      </div>
+
+      {zones.map(zone => {
+        const zoneItems = currentList.items.filter(i=>i.zone===zone);
+        const zoneDone = zoneItems.filter(i=>checks[i.id]).length;
+        const isOpen = openZones[zone] !== false;
+        const zp = zonePhotos[zone] || [];
+
+        return (
+          <div key={zone} className="zone-card">
+            <div className="zone-header" onClick={()=>toggleZone(zone)}>
+              <span>{isOpen?'▼':'▶'} {zone}</span>
+              <span className="count" style={{
+                background:zoneDone===zoneItems.length?'#D1FAE5':'#F1F5F9',
+                color:zoneDone===zoneItems.length?'var(--green)':'var(--text2)'
+              }}>{zoneDone}/{zoneItems.length}</span>
+            </div>
+            {isOpen && (
+              <div className="zone-body">
+                {zoneItems.map(item=>(
+                  <div key={item.id} className={`check-item ${checks[item.id]?'checked':''}`}
+                    onClick={()=>toggleCheck(item.id)}>
+                    <div className="check-box">{checks[item.id]?'✓':''}</div>
+                    <div className="check-label">{item.text}</div>
+                  </div>
+                ))}
+                <div style={{padding:'4px 4px 0'}}>
+                  <PhotoUploader photos={zp} onChange={(p)=>setZonePhoto(zone,p)}
+                    label={`📷 ${zone} 사진`}/>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      <div className="section-header">📷 전체 완료 사진</div>
+      <PhotoUploader photos={photos} onChange={setPhotos} label="청소 완료 전체 사진"/>
+
+      <div className="form-group">
+        <label className="label">특이사항 / 수리 필요 사항</label>
+        <textarea className="input" placeholder="파손, 악취, 수리 필요 등 (없으면 '없음')" value={note} onChange={e=>setNote(e.target.value)}/>
+      </div>
+      <UrgencySelect value={urgency} onChange={setUrgency}/>
+      <button className="btn btn-primary btn-block" style={{marginTop:8}}
+        onClick={()=>onSubmit({
+          formType:'cleaning',
+          checklist:checks,
+          checklistDone:allChecked,
+          checklistTotal:allTotal,
+          photos:photos.length,
+          zonePhotos:Object.fromEntries(Object.entries(zonePhotos).map(([k,v])=>[k,v.length])),
+          note,
+          urgency,
+          _photos:photos,
+          _zonePhotos:zonePhotos
+        })}>
+        보고 제출 ({allChecked}/{allTotal} 완료, 사진 {photos.length + Object.values(zonePhotos).reduce((s,a)=>s+a.length,0)}장)
+      </button>
+    </div>
+  );
+}
+
+function MachineForm({user, onSubmit}){
+  const [data, setData] = useState({ph:'',chlorine:'',temp:'',machineStatus:'정상',repairNote:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+        <div className="form-group">
+          <label className="label">수질 pH</label>
+          <input className="input" type="number" step="0.1" placeholder="예: 7.2" value={data.ph} onChange={e=>set('ph',e.target.value)}/>
+        </div>
+        <div className="form-group">
+          <label className="label">잔류염소 (ppm)</label>
+          <input className="input" type="number" step="0.1" placeholder="예: 0.8" value={data.chlorine} onChange={e=>set('chlorine',e.target.value)}/>
+        </div>
+      </div>
+      <div className="form-group">
+        <label className="label">수온 (°C)</label>
+        <input className="input" type="number" step="0.1" placeholder="예: 28.5" value={data.temp} onChange={e=>set('temp',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">기계 상태</label>
+        <select className="input" value={data.machineStatus} onChange={e=>set('machineStatus',e.target.value)}>
+          <option>정상</option><option>점검필요</option><option>고장</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">수리/점검 현황</label>
+        <textarea className="input" placeholder="없으면 '없음'" value={data.repairNote} onChange={e=>set('repairNote',e.target.value)}/>
+      </div>
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
+      <button className="btn btn-primary btn-block" disabled={!data.ph||!data.chlorine}
+        onClick={()=>onSubmit({...data,formType:'machine'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function HandoverForm({user, onSubmit}){
+  const [data, setData] = useState({pending:'',caution:'',note:''});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">미처리 건</label>
+        <textarea className="input" placeholder="인수인계할 미처리 건" value={data.pending} onChange={e=>set('pending',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">주의사항</label>
+        <textarea className="input" placeholder="주의해야 할 사항" value={data.caution} onChange={e=>set('caution',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">기타 전달사항</label>
+        <textarea className="input" placeholder="추가 전달사항" value={data.note} onChange={e=>set('note',e.target.value)}/>
+      </div>
+      <button className="btn btn-primary btn-block" onClick={()=>onSubmit({...data,formType:'handover',urgency:'green'})}>인수인계 제출</button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// STAFF SCREEN
+// ═══════════════════════════════════════════════════
+function StaffScreen({user, reports, onSubmit}){
+  const [tab, setTab] = useState('report');
+  const todayReport = reports.find(r=>r.date===DB.today()&&r.userId===user.id);
+  const myReports = reports.filter(r=>r.userId===user.id).slice(-20).reverse();
+
+  const FormComponent = {swimming:SwimmingForm, manager:ManagerForm, cleaning:CleaningForm, machine:MachineForm, handover:HandoverForm}[user.formType];
+
+  return (
+    <div className="content fade-in">
+      <div className="tab-bar">
+        <button className={`tab-btn ${tab==='report'?'active':''}`} onClick={()=>setTab('report')}>
+          {todayReport?'✅ 보고완료':'📝 보고하기'}
+        </button>
+        <button className={`tab-btn ${tab==='history'?'active':''}`} onClick={()=>setTab('history')}>📋 내 이력</button>
+      </div>
+
+      {tab==='report' && (
+        todayReport ? (
+          <div className="card" style={{textAlign:'center',padding:32}}>
+            <div style={{fontSize:48,marginBottom:12}}>✅</div>
+            <h3 style={{fontSize:16,fontWeight:700}}>오늘 보고 완료</h3>
+            <p style={{color:'var(--text2)',fontSize:13,marginTop:8}}>제출 시간: {todayReport.time}</p>
+            {todayReport.data.checklistDone != null && (
+              <p style={{color:'var(--text2)',fontSize:13}}>체크리스트: {todayReport.data.checklistDone}/{todayReport.data.checklistTotal} 완료</p>
+            )}
+            {todayReport.data.photos != null && (
+              <p style={{color:'var(--text2)',fontSize:13}}>사진: {todayReport.data.photos + Object.values(todayReport.data.zonePhotos||{}).reduce((s,n)=>s+n,0)}장 첨부</p>
+            )}
+            <p style={{color:'var(--text2)',fontSize:13}}>긴급도: {todayReport.data.urgency==='green'?'🟢 일반':todayReport.data.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</p>
+          </div>
+        ) : FormComponent ? <FormComponent user={user} onSubmit={onSubmit}/> : null
+      )}
+
+      {tab==='history' && (
+        myReports.length===0 ? (
+          <div className="empty-state"><div className="icon">📋</div><p>보고 이력이 없습니다</p></div>
+        ) : myReports.map((r,i)=>(
+          <div key={i} className="card" style={{padding:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+              <span style={{fontSize:13,fontWeight:700}}>{r.date}</span>
+              <span className="badge" style={{background:r.data.urgency==='green'?'#D1FAE5':r.data.urgency==='yellow'?'#FEF3C7':'#FEE2E2',
+                color:r.data.urgency==='green'?'var(--green)':r.data.urgency==='yellow'?'var(--amber)':'var(--red)'}}>
+                {r.data.urgency==='green'?'일반':r.data.urgency==='yellow'?'주의':'긴급'}
+              </span>
+            </div>
+            <p style={{fontSize:12,color:'var(--text2)'}}>제출: {r.time}
+              {r.data.checklistDone != null && ` | 체크 ${r.data.checklistDone}/${r.data.checklistTotal}`}
+              {r.data.photos != null && ` | 사진 ${r.data.photos}장`}
+            </p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// REPORT DETAIL MODAL
+// ═══════════════════════════════════════════════════
+function ReportDetailModal({report, onClose}){
+  if(!report) return null;
+  const staff = STAFF.find(s=>s.id===report.userId);
+  const d = report.data;
+
+  const fieldLabels = {
+    attendance:'출석 인원', classStatus:'수업 상태', complaint:'민원', sales:'매출',
+    newReg:'신규등록', reReg:'재등록', memberNote:'회원 동향', facilityNote:'시설/비품',
+    ph:'수질 pH', chlorine:'잔류염소', temp:'수온', machineStatus:'기계 상태',
+    repairNote:'수리/점검', pending:'미처리 건', caution:'주의사항', note:'특이사항'
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h3 style={{fontSize:16,fontWeight:700}}>📋 보고 상세</h3>
+          <button onClick={onClose} style={{border:'none',background:'none',fontSize:20,cursor:'pointer'}}>✕</button>
+        </div>
+        <div style={{marginBottom:8}}>
+          <span className="badge" style={{background:(DEPT_COLORS[staff?.dept]||'#666')+'20',color:DEPT_COLORS[staff?.dept]}}>
+            {staff?.dept}
+          </span>
+          <span style={{fontSize:13,fontWeight:600,marginLeft:8}}>{staff?.name}</span>
+        </div>
+        <p style={{fontSize:12,color:'var(--text2)',marginBottom:16}}>{report.date} {report.time}</p>
+
+        {Object.entries(d).filter(([k])=>!['formType','urgency','checklist','_photos','_zonePhotos','checklistDone','checklistTotal','photos','zonePhotos'].includes(k)).map(([k,v])=>
+          v ? <div key={k} style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>{fieldLabels[k]||k}</div>
+            <div style={{fontSize:14}}>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</div>
+          </div> : null
+        )}
+
+        {d.checklistDone != null && (
+          <div style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>체크리스트</div>
+            <div style={{fontSize:14}}>{d.checklistDone}/{d.checklistTotal} 완료
+              <div className="progress-bar" style={{marginTop:4}}>
+                <div className="progress-fill" style={{width:`${d.checklistDone/d.checklistTotal*100}%`,background:'var(--green)'}}/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {d._photos && d._photos.length > 0 && (
+          <div style={{padding:'8px 0'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:6}}>첨부 사진</div>
+            <div className="photo-grid">
+              {d._photos.map((p,i) => <img key={i} src={p.data} className="photo-thumb" alt={`사진${i+1}`}/>)}
+            </div>
+          </div>
+        )}
+
+        {d._zonePhotos && Object.entries(d._zonePhotos).map(([zone, zPhotos]) =>
+          zPhotos.length > 0 ? (
+            <div key={zone} style={{padding:'8px 0'}}>
+              <div style={{fontSize:11,color:'var(--text2)',marginBottom:6}}>📷 {zone} 사진</div>
+              <div className="photo-grid">
+                {zPhotos.map((p,i) => <img key={i} src={p.data} className="photo-thumb" alt={`${zone} ${i+1}`}/>)}
+              </div>
+            </div>
+          ) : null
+        )}
+
+        <div style={{padding:'8px 0'}}>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>긴급도</div>
+          <div style={{fontSize:14}}>{d.urgency==='green'?'🟢 일반':d.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// LEAD DASHBOARD
+// ═══════════════════════════════════════════════════
+function LeadDashboard({reports, announcements, onAnnounce}){
+  const [tab, setTab] = useState('today');
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [annoText, setAnnoText] = useState('');
+  const [annoDept, setAnnoDept] = useState('전체');
+  const today = DB.today();
+  const todayReports = reports.filter(r=>r.date===today);
+
+  const reporterIds = ['machine','clean','swim_am','swim_pm','swim_kids','mgr_chief'];
+  const reportStatus = reporterIds.map(id=>{
+    const staff = STAFF.find(s=>s.id===id);
+    const report = todayReports.find(r=>r.userId===id);
+    return {staff, report, deadline: REPORT_DEADLINES[id]};
+  });
+  const doneCount = reportStatus.filter(r=>r.report).length;
+  const urgentCount = todayReports.filter(r=>r.data.urgency==='red').length;
+
+  const weekReports = reports.filter(r=>{
+    const d=new Date(r.date),now=new Date(),mon=new Date(now);
+    mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);
+    return d>=mon && r.data.formType==='manager';
+  });
+  const weeklySales = weekReports.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
+
+  // 미화 체크리스트 현황
+  const cleanReport = todayReports.find(r=>r.data.formType==='cleaning');
+
+  return (
+    <div className="content fade-in">
+      <div className="tab-bar">
+        <button className={`tab-btn ${tab==='today'?'active':''}`} onClick={()=>setTab('today')}>📊 현황</button>
+        <button className={`tab-btn ${tab==='reports'?'active':''}`} onClick={()=>setTab('reports')}>📋 보고</button>
+        <button className={`tab-btn ${tab==='weekly'?'active':''}`} onClick={()=>setTab('weekly')}>📈 주간</button>
+        <button className={`tab-btn ${tab==='announce'?'active':''}`} onClick={()=>setTab('announce')}>📢 공지</button>
+      </div>
+
+      {tab==='today' && <>
+        <div className="stat-grid">
+          <div className="stat-card" style={{background:'#EFF6FF'}}>
+            <div className="value" style={{color:'var(--sky)'}}>{doneCount}/{reporterIds.length}</div>
+            <div className="label">보고 완료</div>
+            <div className="progress-bar"><div className="progress-fill" style={{width:`${doneCount/reporterIds.length*100}%`,background:'var(--sky)'}}/></div>
+          </div>
+          <div className="stat-card" style={{background:urgentCount>0?'#FEF2F2':'#F0FDF4'}}>
+            <div className="value" style={{color:urgentCount>0?'var(--red)':'var(--green)'}}>{urgentCount}</div>
+            <div className="label">긴급사항</div>
+          </div>
+          <div className="stat-card" style={{background:'#FFF7ED'}}>
+            <div className="value" style={{color:'var(--amber)',fontSize:18}}>{weeklySales?weeklySales.toLocaleString()+'원':'-'}</div>
+            <div className="label">주간 매출</div>
+          </div>
+          <div className="stat-card" style={{background:'#F5F3FF'}}>
+            <div className="value" style={{color:'var(--purple)'}}>{cleanReport?`${cleanReport.data.checklistDone||0}/${cleanReport.data.checklistTotal||0}`:'-'}</div>
+            <div className="label">미화 체크</div>
+          </div>
+        </div>
+
+        <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>보고 현황</h3>
+        {reportStatus.map(({staff,report,deadline},i)=>(
+          <div key={i} className="report-item card" style={{padding:10,cursor:report?'pointer':'default'}}
+            onClick={()=>report&&setSelectedReport(report)}>
+            <div className="dot" style={{background:report?'var(--green)':'#cbd5e1'}}/>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:600}}>{staff.name}</div>
+              <div style={{fontSize:11,color:'var(--text2)'}}>{staff.dept} · 마감 {deadline}
+                {report?.data.checklistDone != null && ` · 체크 ${report.data.checklistDone}/${report.data.checklistTotal}`}
+              </div>
+            </div>
+            <span className="badge" style={{background:report?
+              (report.data.urgency==='red'?'#FEE2E2':report.data.urgency==='yellow'?'#FEF3C7':'#D1FAE5'):'#F1F5F9',
+              color:report?(report.data.urgency==='red'?'var(--red)':report.data.urgency==='yellow'?'var(--amber)':'var(--green)'):'#94a3b8',fontSize:11}}>
+              {report?`${report.time} 완료`:'대기'}
+            </span>
+          </div>
+        ))}
+
+        <ReportDetailModal report={selectedReport} onClose={()=>setSelectedReport(null)}/>
+      </>}
+
+      {tab==='reports' && <>
+        <h3 style={{fontSize:14,fontWeight:700,marginBottom:12}}>전체 보고 내역</h3>
+        {reports.slice(-30).reverse().map((r,i)=>{
+          const staff = STAFF.find(s=>s.id===r.userId);
+          return (
+            <div key={i} className="card" style={{padding:10,cursor:'pointer'}} onClick={()=>setSelectedReport(r)}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <span className="badge" style={{background:(DEPT_COLORS[staff?.dept]||'#666')+'20',color:DEPT_COLORS[staff?.dept]||'#666',fontSize:10}}>
+                  {staff?.dept}
+                </span>
+                <span style={{fontSize:13,fontWeight:600,flex:1}}>{staff?.name}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{r.date} {r.time}</span>
+              </div>
+              {r.data.checklistDone != null && (
+                <div style={{marginTop:4}}>
+                  <div className="progress-bar"><div className="progress-fill" style={{width:`${r.data.checklistDone/r.data.checklistTotal*100}%`,background:r.data.formType==='cleaning'?'var(--purple)':'var(--green)'}}/></div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <ReportDetailModal report={selectedReport} onClose={()=>setSelectedReport(null)}/>
+      </>}
+
+      {tab==='weekly' && <WeeklyReport reports={reports}/>}
+
+      {tab==='announce' && <>
+        <div className="card" style={{padding:16}}>
+          <div className="form-group">
+            <label className="label">수신 부서</label>
+            <select className="input" value={annoDept} onChange={e=>setAnnoDept(e.target.value)}>
+              <option>전체</option><option>수영팀</option><option>매니저팀</option><option>미화팀</option><option>기계팀</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="label">공지 내용</label>
+            <textarea className="input" value={annoText} onChange={e=>setAnnoText(e.target.value)} placeholder="공지 내용을 입력하세요"/>
+          </div>
+          <button className="btn btn-primary btn-block" disabled={!annoText.trim()}
+            onClick={()=>{onAnnounce({dept:annoDept,text:annoText,date:DB.today(),time:DB.now()});setAnnoText('')}}>
+            📢 공지 발송
+          </button>
+        </div>
+        <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>발송된 공지</h3>
+        {announcements.slice().reverse().map((a,i)=>(
+          <div key={i} className="card" style={{padding:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+              <span className="badge" style={{background:'#EFF6FF',color:'var(--sky)'}}>{a.dept}</span>
+              <span style={{fontSize:11,color:'var(--text2)'}}>{a.date} {a.time}</span>
+            </div>
+            <p style={{fontSize:13,marginTop:6}}>{a.text}</p>
+          </div>
+        ))}
+      </>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// WEEKLY REPORT
+// ═══════════════════════════════════════════════════
+function WeeklyReport({reports}){
+  const now = new Date();
+  const mon = new Date(now); mon.setDate(now.getDate()-now.getDay()+1); mon.setHours(0,0,0,0);
+  const weekReports = reports.filter(r=>new Date(r.date)>=mon);
+
+  const days = ['월','화','수','목','금'];
+  const depts = ['수영팀','매니저팀','미화팀','기계팀'];
+
+  const salesData = weekReports.filter(r=>r.data.formType==='manager');
+  const totalSales = salesData.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
+  const totalReg = salesData.reduce((s,r)=>s+(Number(r.data.newReg)||0),0);
+  const totalReReg = salesData.reduce((s,r)=>s+(Number(r.data.reReg)||0),0);
+
+  const urgents = weekReports.filter(r=>r.data.urgency==='red');
+
+  return (
+    <div className="fade-in">
+      <div className="card" style={{padding:16}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>📈 이번 주 요약</h3>
+        <div className="stat-grid">
+          <div style={{padding:10,background:'#EFF6FF',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:'var(--sky)'}}>{weekReports.length}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>총 보고</div>
+          </div>
+          <div style={{padding:10,background:'#FFF7ED',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:14,fontWeight:800,color:'var(--amber)'}}>{totalSales?totalSales.toLocaleString()+'원':'-'}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>주간 매출</div>
+          </div>
+          <div style={{padding:10,background:'#F0FDF4',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{totalReg} / {totalReReg}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>신규 / 재등록</div>
+          </div>
+          <div style={{padding:10,background:urgents.length>0?'#FEF2F2':'#F0FDF4',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:urgents.length>0?'var(--red)':'var(--green)'}}>{urgents.length}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>긴급사항</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{padding:16,overflowX:'auto'}}>
+        <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>요일별 보고 현황</h3>
+        <table style={{width:'100%',fontSize:12,borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{borderBottom:'2px solid var(--border)'}}>
+              <th style={{padding:6,textAlign:'left'}}>부서</th>
+              {days.map(d=><th key={d} style={{padding:6,textAlign:'center'}}>{d}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {depts.map(dept=>(
+              <tr key={dept} style={{borderBottom:'1px solid var(--border)'}}>
+                <td style={{padding:6,fontWeight:600,color:DEPT_COLORS[dept]}}>{dept}</td>
+                {[0,1,2,3,4].map(di=>{
+                  const day = new Date(mon); day.setDate(mon.getDate()+di);
+                  const ds = day.toISOString().slice(0,10);
+                  const has = weekReports.some(r=>r.date===ds&&STAFF.find(s=>s.id===r.userId)?.dept===dept);
+                  return <td key={di} style={{padding:6,textAlign:'center'}}>{has?'🟢':'⚪'}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {urgents.length>0 && (
+        <div className="card" style={{padding:16,borderColor:'var(--red)'}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:'var(--red)',marginBottom:8}}>🚨 긴급사항 ({urgents.length}건)</h3>
+          {urgents.map((r,i)=>(
+            <div key={i} style={{padding:8,background:'#FEF2F2',borderRadius:8,marginBottom:6,fontSize:13}}>
+              <strong>{STAFF.find(s=>s.id===r.userId)?.name}</strong> ({r.date}): {r.data.note||r.data.damage||r.data.repairNote||'-'}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// EXEC SCREEN
+// ═══════════════════════════════════════════════════
+function ExecScreen({reports}){
+  return (
+    <div className="content fade-in">
+      <h2 style={{fontSize:16,fontWeight:700,marginBottom:16}}>📈 운영 현황 요약</h2>
+      <WeeklyReport reports={reports}/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS SCREEN
+// ═══════════════════════════════════════════════════
+function SettingsScreen({user, onLogout, reports, announcements}){
+  const exportData = () => {
+    const data = {reports: reports.map(r => {
+      const d = {...r.data};
+      delete d._photos; delete d._zonePhotos;
+      return {...r, data: d};
+    }), announcements, exported: new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`PAB_백업_${DB.today()}.json`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = () => {
+    const input = document.createElement('input'); input.type='file'; input.accept='.json';
+    input.onchange = e => {
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if(data.reports) DB.set('reports', data.reports);
+          if(data.announcements) DB.set('announcements', data.announcements);
+          window.location.reload();
+        } catch{ alert('잘못된 파일입니다.'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  return (
+    <div className="content fade-in">
+      <div className="card" style={{padding:16}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
+          <div style={{width:44,height:44,borderRadius:22,background:DEPT_COLORS[user.dept]||'var(--sky)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:700}}>
+            {user.name[0]}
+          </div>
+          <div>
+            <div style={{fontWeight:700}}>{user.name}</div>
+            <div style={{fontSize:12,color:'var(--text2)'}}>{user.dept} · {user.role==='lead'?'운영팀장':user.role==='exec'?'운영진':'담당자'}</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>데이터 관리</h3>
+      <div className="card" style={{padding:0}}>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
+          onClick={exportData}>📤 데이터 백업 (JSON 다운로드)</button>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
+          onClick={importData}>📥 데이터 복원 (JSON 업로드)</button>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',color:'var(--text2)',cursor:'pointer'}}
+          onClick={()=>{}}>📊 보고 {reports.length}건 · 공지 {announcements.length}건</button>
+      </div>
+
+      <div style={{marginTop:24}}>
+        <button className="btn btn-outline btn-block" onClick={onLogout}>로그아웃</button>
+      </div>
+      <p style={{textAlign:'center',fontSize:11,color:'#bbb',marginTop:24}}>PAB 커뮤니케이션 v2.0</p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════
+function App(){
+  const [userId, setUserId] = useState(()=>DB.get('currentUser'));
+  const [reports, setReports] = useState(()=>DB.get('reports',[]));
+  const [announcements, setAnnouncements] = useState(()=>DB.get('announcements',[]));
+  const [activeTab, setActiveTab] = useState('home');
+  const [toast, setToast] = useState(null);
+
+  const user = STAFF.find(s=>s.id===userId);
+
+  useEffect(()=>{
+    // Save reports without photo data to localStorage (photos are too large)
+    const lite = reports.map(r => {
+      const d = {...r.data};
+      delete d._photos; delete d._zonePhotos;
+      return {...r, data: d};
+    });
+    DB.set('reports', lite);
+  },[reports]);
+  useEffect(()=>{DB.set('announcements',announcements)},[announcements]);
+
+  const login = (id) => { DB.set('currentUser',id); setUserId(id); setActiveTab('home'); };
+  const logout = () => { DB.set('currentUser',null); setUserId(null); };
+
+  const submitReport = (data) => {
+    const report = {userId, date:DB.today(), time:DB.now(), data};
+    setReports(prev=>[...prev, report]);
+    setToast({msg:'✅ 보고가 제출되었습니다!', type:'success'});
+  };
+
+  const addAnnouncement = (anno) => {
+    setAnnouncements(prev=>[...prev, anno]);
+    setToast({msg:'📢 공지가 발송되었습니다', type:'info'});
+  };
+
+  if(!userId) return <LoginScreen onLogin={login}/>;
+  if(!user) { logout(); return null; }
+
+  const todayUrgent = reports.filter(r=>r.date===DB.today()&&r.data.urgency==='red').length;
+  const todayAnnounce = announcements.filter(a=>a.date===DB.today()).length;
+
+  const navItems = user.role==='staff' ? [
+    {id:'home',icon:'📝',label:'보고'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ] : user.role==='lead' ? [
+    {id:'home',icon:'📊',label:'대시보드'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ] : [
+    {id:'home',icon:'📈',label:'현황'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ];
+
+  return (
+    <div className="app">
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+
+      <div className="header">
+        <div className="header-inner">
+          <h1>🏊 PAB 커뮤니케이션</h1>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            {todayUrgent>0 && <span className="badge" style={{background:'#FEE2E2',color:'var(--red)'}}>🚨 {todayUrgent}</span>}
+            <span style={{fontSize:12,color:'var(--text2)'}}>{user.name}</span>
+          </div>
+        </div>
+        <div style={{fontSize:12,color:'var(--text2)',paddingBottom:8}}>{DB.todayLabel()}</div>
+      </div>
+
+      {activeTab==='home' && user.role==='staff' && <StaffScreen user={user} reports={reports} onSubmit={submitReport}/>}
+      {activeTab==='home' && user.role==='lead' && <LeadDashboard reports={reports} announcements={announcements} onAnnounce={addAnnouncement}/>}
+      {activeTab==='home' && user.role==='exec' && <ExecScreen reports={reports}/>}
+
+      {activeTab==='notice' && (
+        <div className="content fade-in">
+          <h2 style={{fontSize:16,fontWeight:700,marginBottom:12}}>📢 공지사항</h2>
+          {announcements.filter(a=>user.role!=='staff'||a.dept==='전체'||a.dept===user.dept).length===0 ? (
+            <div className="empty-state"><div className="icon">📢</div><p>공지사항이 없습니다</p></div>
+          ) : announcements.filter(a=>user.role!=='staff'||a.dept==='전체'||a.dept===user.dept).slice().reverse().map((a,i)=>(
+            <div key={i} className="card" style={{padding:12}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                <span className="badge" style={{background:'#EFF6FF',color:'var(--sky)'}}>{a.dept}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{a.date} {a.time}</span>
+              </div>
+              <p style={{fontSize:14,marginTop:8,lineHeight:1.5}}>{a.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab==='settings' && <SettingsScreen user={user} onLogout={logout} reports={reports} announcements={announcements}/>}
+
+      <div className="nav">
+        {navItems.map(item=>(
+          <button key={item.id} className={activeTab===item.id?'active':''} onClick={()=>setActiveTab(item.id)}>
+            <span className="icon">{item.icon}</span>
+            {item.label}
+            {item.id==='notice' && todayAnnounce>0 && <span className="notif">{todayAnnounce}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
