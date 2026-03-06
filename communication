@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PAB 커뮤니케이션</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--sky:#0ea5e9;--sky-d:#0284c7;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--slate:#64748b;--bg:#f1f5f9;--card:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#64748b;--radius:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit;font-size:inherit}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:70px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:10px;border:none;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;gap:6px}
+.btn-primary{background:var(--sky);color:#fff}.btn-primary:active{background:var(--sky-d)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-block{width:100%;padding:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;transition:border .2s;background:#fff}
+.input:focus{outline:none;border-color:var(--sky)}
+select.input{-webkit-appearance:none;appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center #fff}
+textarea.input{resize:vertical;min-height:80px}
+.label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-group{margin-bottom:14px}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);padding:0 16px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:54px}
+.header h1{font-size:16px;font-weight:700}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:none;background:none;font-size:10px;color:var(--text2);cursor:pointer;position:relative}
+.nav button.active{color:var(--sky);font-weight:700}
+.nav button .icon{font-size:20px}
+.nav .notif{position:absolute;top:4px;right:50%;margin-right:-14px;width:16px;height:16px;background:var(--red);color:#fff;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.content{padding:16px}
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s}
+.urgency-select{display:flex;gap:8px}
+.urgency-opt{flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.urgency-opt.selected{border-color:currentColor;transform:scale(1.03)}
+.report-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;transition:background .2s}
+.report-item:active{background:#f1f5f9}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{padding:14px;border-radius:var(--radius);text-align:center}
+.stat-card .value{font-size:24px;font-weight:800}
+.stat-card .label{font-size:11px;color:var(--text2);margin-top:2px}
+.timeline-item{display:flex;gap:12px;padding:8px 0}
+.timeline-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.timeline-line{position:relative;padding-left:4px}
+.timeline-line::before{content:'';position:absolute;left:3.5px;top:14px;bottom:-8px;width:1px;background:var(--border)}
+.timeline-item:last-child .timeline-line::before{display:none}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.tab-bar{display:flex;gap:4px;padding:4px;background:#f1f5f9;border-radius:10px;margin-bottom:16px}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.tab-btn.active{background:#fff;color:var(--sky);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:200;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useMemo,useRef} = React;
+
+// ═══════════════════════════════════════════════════
+// DATA & CONFIG
+// ═══════════════════════════════════════════════════
+const STAFF = [
+  {id:'swim_am',name:'성인 오전담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'swim_pm',name:'성인 오후담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'swim_kids',name:'키즈담당',dept:'수영팀',role:'staff',formType:'swimming'},
+  {id:'mgr_chief',name:'매니저 실장',dept:'매니저팀',role:'staff',formType:'manager'},
+  {id:'mgr_am',name:'오전 파트매니저',dept:'매니저팀',role:'staff',formType:'handover'},
+  {id:'mgr_pm',name:'오후 파트매니저',dept:'매니저팀',role:'staff',formType:'handover'},
+  {id:'clean',name:'미화 담당',dept:'미화팀',role:'staff',formType:'cleaning'},
+  {id:'machine',name:'기관장',dept:'기계팀',role:'staff',formType:'machine'},
+  {id:'lead',name:'운영팀장 (보형)',dept:'운영',role:'lead',formType:null},
+  {id:'exec1',name:'대표',dept:'운영진',role:'exec',formType:null},
+  {id:'exec2',name:'이사',dept:'운영진',role:'exec',formType:null},
+];
+
+const DEPT_COLORS = {
+  '수영팀':'#10b981','매니저팀':'#f59e0b','미화팀':'#8b5cf6','기계팀':'#ef4444','운영':'#0ea5e9','운영진':'#6366f1'
+};
+
+const REPORT_DEADLINES = {
+  machine:'09:00', clean:'09:30', swim_am:'14:00', swim_pm:'18:00', swim_kids:'18:00', mgr_chief:'18:00'
+};
+
+// localStorage helpers
+const DB = {
+  get(key, def=null){ try{const v=localStorage.getItem('pab_'+key);return v?JSON.parse(v):def}catch{return def} },
+  set(key, val){ try{localStorage.setItem('pab_'+key, JSON.stringify(val))}catch{} },
+  today(){ return new Date().toISOString().slice(0,10) },
+  now(){ return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) },
+  todayLabel(){ return new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'}) }
+};
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function Toast({msg, type='success', onClose}){
+  useEffect(()=>{const t=setTimeout(onClose,2500);return()=>clearTimeout(t)},[]);
+  const bg = type==='success'?'#10b981':type==='error'?'#ef4444':'#0ea5e9';
+  return <div className="toast" style={{background:bg}}>{msg}</div>;
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════
+function LoginScreen({onLogin}){
+  const [selected, setSelected] = useState('');
+  return (
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',justifyContent:'center',padding:'24px'}}>
+      <div style={{textAlign:'center',marginBottom:40}}>
+        <div style={{fontSize:48,marginBottom:12}}>🏊</div>
+        <h1 style={{fontSize:24,fontWeight:800,color:'var(--sky)'}}>PAB 커뮤니케이션</h1>
+        <p style={{color:'var(--text2)',marginTop:8,fontSize:14}}>수영장 운영 보고·소통 시스템</p>
+      </div>
+      <div className="card" style={{padding:24}}>
+        <div className="form-group">
+          <label className="label">이름을 선택하세요</label>
+          <select className="input" value={selected} onChange={e=>setSelected(e.target.value)} style={{fontSize:16}}>
+            <option value="">-- 선택 --</option>
+            <optgroup label="수영팀">
+              {STAFF.filter(s=>s.dept==='수영팀').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="매니저팀">
+              {STAFF.filter(s=>s.dept==='매니저팀').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="시설관리">
+              {STAFF.filter(s=>['미화팀','기계팀'].includes(s.dept)).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+            <optgroup label="운영">
+              {STAFF.filter(s=>['운영','운영진'].includes(s.dept)).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            </optgroup>
+          </select>
+        </div>
+        <button className="btn btn-primary btn-block" disabled={!selected} onClick={()=>onLogin(selected)} style={{fontSize:16,padding:16}}>
+          로그인
+        </button>
+      </div>
+      <p style={{textAlign:'center',fontSize:11,color:'#aaa',marginTop:24}}>PAB 커뮤니케이션 v1.0</p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// REPORT FORMS
+// ═══════════════════════════════════════════════════
+function SwimmingForm({user, onSubmit}){
+  const [data, setData] = useState({attendance:'',classStatus:'정상 진행',complaint:'없음',note:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">출석 인원 (명)</label>
+        <input className="input" type="number" placeholder="예: 45" value={data.attendance} onChange={e=>set('attendance',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">수업 진행 상태</label>
+        <select className="input" value={data.classStatus} onChange={e=>set('classStatus',e.target.value)}>
+          <option>정상 진행</option><option>대체 강사</option><option>휴강</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">민원 유무</label>
+        <select className="input" value={data.complaint} onChange={e=>set('complaint',e.target.value)}>
+          <option>없음</option><option>있음</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">특이사항</label>
+        <textarea className="input" placeholder="특이사항을 입력하세요 (없으면 '없음')" value={data.note} onChange={e=>set('note',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">긴급도</label>
+        <div className="urgency-select">
+          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
+              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+              onClick={()=>set('urgency',k)}>{l}</div>
+          )}
+        </div>
+      </div>
+      <button className="btn btn-primary btn-block" disabled={!data.attendance}
+        onClick={()=>onSubmit({...data,formType:'swimming'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function ManagerForm({user, onSubmit}){
+  const [data, setData] = useState({sales:'',newReg:'',memberNote:'',facilityNote:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">오늘 총 매출 (원)</label>
+        <input className="input" type="number" placeholder="예: 1500000" value={data.sales} onChange={e=>set('sales',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">신규 등록 건수</label>
+        <input className="input" type="number" placeholder="예: 3" value={data.newReg} onChange={e=>set('newReg',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">회원 동향 / 특이사항</label>
+        <textarea className="input" placeholder="회원 동향, 민원 등" value={data.memberNote} onChange={e=>set('memberNote',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">시설 민원</label>
+        <textarea className="input" placeholder="없으면 '없음'" value={data.facilityNote} onChange={e=>set('facilityNote',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">긴급도</label>
+        <div className="urgency-select">
+          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
+              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+              onClick={()=>set('urgency',k)}>{l}</div>
+          )}
+        </div>
+      </div>
+      <button className="btn btn-primary btn-block" disabled={!data.sales}
+        onClick={()=>onSubmit({...data,formType:'manager'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function CleaningForm({user, onSubmit}){
+  const [data, setData] = useState({locker:'완료',pool:'완료',shower:'완료',supplies:'',damage:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  const opts = ['완료','미완료','보수필요'];
+  return (
+    <div className="fade-in">
+      {[['locker','탈의실 청소'],['pool','풀장 주변 청소'],['shower','샤워실 청소']].map(([k,l])=>
+        <div key={k} className="form-group">
+          <label className="label">{l}</label>
+          <select className="input" value={data[k]} onChange={e=>set(k,e.target.value)}>
+            {opts.map(o=><option key={o}>{o}</option>)}
+          </select>
+        </div>
+      )}
+      <div className="form-group">
+        <label className="label">소모품 현황</label>
+        <textarea className="input" placeholder="부족 품목 기재" value={data.supplies} onChange={e=>set('supplies',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">시설 파손/이상</label>
+        <textarea className="input" placeholder="없으면 '없음'" value={data.damage} onChange={e=>set('damage',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">긴급도</label>
+        <div className="urgency-select">
+          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
+              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+              onClick={()=>set('urgency',k)}>{l}</div>
+          )}
+        </div>
+      </div>
+      <button className="btn btn-primary btn-block" onClick={()=>onSubmit({...data,formType:'cleaning'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function MachineForm({user, onSubmit}){
+  const [data, setData] = useState({ph:'',chlorine:'',machineStatus:'정상',repairNote:'',urgency:'green'});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">수질 pH</label>
+        <input className="input" type="number" step="0.1" placeholder="예: 7.2" value={data.ph} onChange={e=>set('ph',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">잔류염소 (ppm)</label>
+        <input className="input" type="number" step="0.1" placeholder="예: 0.8" value={data.chlorine} onChange={e=>set('chlorine',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">기계 상태</label>
+        <select className="input" value={data.machineStatus} onChange={e=>set('machineStatus',e.target.value)}>
+          <option>정상</option><option>점검필요</option><option>고장</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="label">수리/점검 현황</label>
+        <textarea className="input" placeholder="없으면 '없음'" value={data.repairNote} onChange={e=>set('repairNote',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">긴급도</label>
+        <div className="urgency-select">
+          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
+              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+              onClick={()=>set('urgency',k)}>{l}</div>
+          )}
+        </div>
+      </div>
+      <button className="btn btn-primary btn-block" disabled={!data.ph||!data.chlorine}
+        onClick={()=>onSubmit({...data,formType:'machine'})}>보고 제출</button>
+    </div>
+  );
+}
+
+function HandoverForm({user, onSubmit}){
+  const [data, setData] = useState({pending:'',caution:'',note:''});
+  const set = (k,v) => setData(p=>({...p,[k]:v}));
+  return (
+    <div className="fade-in">
+      <div className="form-group">
+        <label className="label">미처리 건</label>
+        <textarea className="input" placeholder="인수인계할 미처리 건" value={data.pending} onChange={e=>set('pending',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">주의사항</label>
+        <textarea className="input" placeholder="주의해야 할 사항" value={data.caution} onChange={e=>set('caution',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">기타 전달사항</label>
+        <textarea className="input" placeholder="추가 전달사항" value={data.note} onChange={e=>set('note',e.target.value)}/>
+      </div>
+      <button className="btn btn-primary btn-block" onClick={()=>onSubmit({...data,formType:'handover',urgency:'green'})}>인수인계 제출</button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// STAFF SCREEN
+// ═══════════════════════════════════════════════════
+function StaffScreen({user, reports, onSubmit}){
+  const [tab, setTab] = useState('report');
+  const todayReport = reports.find(r=>r.date===DB.today()&&r.userId===user.id);
+  const myReports = reports.filter(r=>r.userId===user.id).slice(-20).reverse();
+
+  const FormComponent = {swimming:SwimmingForm, manager:ManagerForm, cleaning:CleaningForm, machine:MachineForm, handover:HandoverForm}[user.formType];
+
+  return (
+    <div className="content fade-in">
+      <div className="tab-bar">
+        <button className={`tab-btn ${tab==='report'?'active':''}`} onClick={()=>setTab('report')}>
+          {todayReport?'✅ 보고완료':'📝 보고하기'}
+        </button>
+        <button className={`tab-btn ${tab==='history'?'active':''}`} onClick={()=>setTab('history')}>📋 내 이력</button>
+      </div>
+
+      {tab==='report' && (
+        todayReport ? (
+          <div className="card" style={{textAlign:'center',padding:32}}>
+            <div style={{fontSize:48,marginBottom:12}}>✅</div>
+            <h3 style={{fontSize:16,fontWeight:700}}>오늘 보고 완료</h3>
+            <p style={{color:'var(--text2)',fontSize:13,marginTop:8}}>제출 시간: {todayReport.time}</p>
+            <p style={{color:'var(--text2)',fontSize:13}}>긴급도: {todayReport.data.urgency==='green'?'🟢 일반':todayReport.data.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</p>
+          </div>
+        ) : FormComponent ? <FormComponent user={user} onSubmit={onSubmit}/> : null
+      )}
+
+      {tab==='history' && (
+        myReports.length===0 ? (
+          <div className="empty-state"><div className="icon">📋</div><p>보고 이력이 없습니다</p></div>
+        ) : myReports.map((r,i)=>(
+          <div key={i} className="card" style={{padding:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+              <span style={{fontSize:13,fontWeight:700}}>{r.date}</span>
+              <span className="badge" style={{background:r.data.urgency==='green'?'#D1FAE5':r.data.urgency==='yellow'?'#FEF3C7':'#FEE2E2',
+                color:r.data.urgency==='green'?'var(--green)':r.data.urgency==='yellow'?'var(--amber)':'var(--red)'}}>
+                {r.data.urgency==='green'?'일반':r.data.urgency==='yellow'?'주의':'긴급'}
+              </span>
+            </div>
+            <p style={{fontSize:12,color:'var(--text2)'}}>제출: {r.time}</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// LEAD DASHBOARD
+// ═══════════════════════════════════════════════════
+function LeadDashboard({reports, announcements, onAnnounce}){
+  const [tab, setTab] = useState('today');
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [annoText, setAnnoText] = useState('');
+  const [annoDept, setAnnoDept] = useState('전체');
+  const today = DB.today();
+  const todayReports = reports.filter(r=>r.date===today);
+
+  const reporterIds = ['machine','clean','swim_am','swim_pm','swim_kids','mgr_chief'];
+  const reportStatus = reporterIds.map(id=>{
+    const staff = STAFF.find(s=>s.id===id);
+    const report = todayReports.find(r=>r.userId===id);
+    return {staff, report, deadline: REPORT_DEADLINES[id]};
+  });
+  const doneCount = reportStatus.filter(r=>r.report).length;
+  const urgentCount = todayReports.filter(r=>r.data.urgency==='red').length;
+
+  // Weekly sales
+  const weekReports = reports.filter(r=>{
+    const d=new Date(r.date),now=new Date(),mon=new Date(now);
+    mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);
+    return d>=mon && r.data.formType==='manager';
+  });
+  const weeklySales = weekReports.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
+
+  return (
+    <div className="content fade-in">
+      <div className="tab-bar">
+        <button className={`tab-btn ${tab==='today'?'active':''}`} onClick={()=>setTab('today')}>📊 현황</button>
+        <button className={`tab-btn ${tab==='reports'?'active':''}`} onClick={()=>setTab('reports')}>📋 보고</button>
+        <button className={`tab-btn ${tab==='weekly'?'active':''}`} onClick={()=>setTab('weekly')}>📈 주간</button>
+        <button className={`tab-btn ${tab==='announce'?'active':''}`} onClick={()=>setTab('announce')}>📢 공지</button>
+      </div>
+
+      {tab==='today' && <>
+        <div className="stat-grid">
+          <div className="stat-card" style={{background:'#EFF6FF'}}>
+            <div className="value" style={{color:'var(--sky)'}}>{doneCount}/{reporterIds.length}</div>
+            <div className="label">보고 완료</div>
+            <div className="progress-bar"><div className="progress-fill" style={{width:`${doneCount/reporterIds.length*100}%`,background:'var(--sky)'}}/></div>
+          </div>
+          <div className="stat-card" style={{background:urgentCount>0?'#FEF2F2':'#F0FDF4'}}>
+            <div className="value" style={{color:urgentCount>0?'var(--red)':'var(--green)'}}>{urgentCount}</div>
+            <div className="label">긴급사항</div>
+          </div>
+          <div className="stat-card" style={{background:'#FFF7ED'}}>
+            <div className="value" style={{color:'var(--amber)',fontSize:18}}>{weeklySales?weeklySales.toLocaleString()+'원':'-'}</div>
+            <div className="label">주간 매출</div>
+          </div>
+          <div className="stat-card" style={{background:'#F5F3FF'}}>
+            <div className="value" style={{color:'var(--purple)'}}>{todayReports.length}</div>
+            <div className="label">오늘 총 보고</div>
+          </div>
+        </div>
+
+        <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>보고 현황</h3>
+        {reportStatus.map(({staff,report,deadline},i)=>(
+          <div key={i} className="report-item card" style={{padding:10,cursor:report?'pointer':'default'}}
+            onClick={()=>report&&setSelectedReport(report)}>
+            <div className="dot" style={{background:report?'var(--green)':'#cbd5e1'}}/>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:600}}>{staff.name}</div>
+              <div style={{fontSize:11,color:'var(--text2)'}}>{staff.dept} · 마감 {deadline}</div>
+            </div>
+            <span className="badge" style={{background:report?'#D1FAE5':'#F1F5F9',color:report?'var(--green)':'#94a3b8',fontSize:11}}>
+              {report?`${report.time} 완료`:'대기'}
+            </span>
+          </div>
+        ))}
+
+        {selectedReport && (
+          <div className="modal-overlay" onClick={()=>setSelectedReport(null)}>
+            <div className="modal" onClick={e=>e.stopPropagation()}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <h3 style={{fontSize:16,fontWeight:700}}>📋 보고 상세</h3>
+                <button onClick={()=>setSelectedReport(null)} style={{border:'none',background:'none',fontSize:20,cursor:'pointer'}}>✕</button>
+              </div>
+              <div style={{marginBottom:8}}>
+                <span className="badge" style={{background:DEPT_COLORS[STAFF.find(s=>s.id===selectedReport.userId)?.dept]+'20',
+                  color:DEPT_COLORS[STAFF.find(s=>s.id===selectedReport.userId)?.dept]}}>
+                  {STAFF.find(s=>s.id===selectedReport.userId)?.dept}
+                </span>
+                <span style={{fontSize:13,fontWeight:600,marginLeft:8}}>{STAFF.find(s=>s.id===selectedReport.userId)?.name}</span>
+              </div>
+              <p style={{fontSize:12,color:'var(--text2)',marginBottom:16}}>{selectedReport.date} {selectedReport.time}</p>
+              {Object.entries(selectedReport.data).filter(([k])=>!['formType','urgency'].includes(k)).map(([k,v])=>
+                v ? <div key={k} style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                  <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>{k}</div>
+                  <div style={{fontSize:14}}>{v}</div>
+                </div> : null
+              )}
+              <div style={{padding:'8px 0'}}>
+                <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>긴급도</div>
+                <div style={{fontSize:14}}>{selectedReport.data.urgency==='green'?'🟢 일반':selectedReport.data.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>}
+
+      {tab==='reports' && <>
+        <h3 style={{fontSize:14,fontWeight:700,marginBottom:12}}>전체 보고 내역</h3>
+        {reports.slice(-30).reverse().map((r,i)=>{
+          const staff = STAFF.find(s=>s.id===r.userId);
+          return (
+            <div key={i} className="card" style={{padding:10,cursor:'pointer'}} onClick={()=>setSelectedReport(r)}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <span className="badge" style={{background:(DEPT_COLORS[staff?.dept]||'#666')+'20',color:DEPT_COLORS[staff?.dept]||'#666',fontSize:10}}>
+                  {staff?.dept}
+                </span>
+                <span style={{fontSize:13,fontWeight:600,flex:1}}>{staff?.name}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{r.date} {r.time}</span>
+              </div>
+            </div>
+          );
+        })}
+      </>}
+
+      {tab==='weekly' && <WeeklyReport reports={reports}/>}
+
+      {tab==='announce' && <>
+        <div className="card" style={{padding:16}}>
+          <div className="form-group">
+            <label className="label">수신 부서</label>
+            <select className="input" value={annoDept} onChange={e=>setAnnoDept(e.target.value)}>
+              <option>전체</option><option>수영팀</option><option>매니저팀</option><option>미화팀</option><option>기계팀</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="label">공지 내용</label>
+            <textarea className="input" value={annoText} onChange={e=>setAnnoText(e.target.value)} placeholder="공지 내용을 입력하세요"/>
+          </div>
+          <button className="btn btn-primary btn-block" disabled={!annoText.trim()}
+            onClick={()=>{onAnnounce({dept:annoDept,text:annoText,date:DB.today(),time:DB.now()});setAnnoText('')}}>
+            📢 공지 발송
+          </button>
+        </div>
+        <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>발송된 공지</h3>
+        {announcements.slice().reverse().map((a,i)=>(
+          <div key={i} className="card" style={{padding:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+              <span className="badge" style={{background:'#EFF6FF',color:'var(--sky)'}}>{a.dept}</span>
+              <span style={{fontSize:11,color:'var(--text2)'}}>{a.date} {a.time}</span>
+            </div>
+            <p style={{fontSize:13,marginTop:6}}>{a.text}</p>
+          </div>
+        ))}
+      </>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// WEEKLY REPORT
+// ═══════════════════════════════════════════════════
+function WeeklyReport({reports}){
+  const now = new Date();
+  const mon = new Date(now); mon.setDate(now.getDate()-now.getDay()+1); mon.setHours(0,0,0,0);
+  const weekReports = reports.filter(r=>new Date(r.date)>=mon);
+
+  const days = ['월','화','수','목','금'];
+  const depts = ['수영팀','매니저팀','미화팀','기계팀'];
+
+  const salesData = weekReports.filter(r=>r.data.formType==='manager');
+  const totalSales = salesData.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
+  const totalReg = salesData.reduce((s,r)=>s+(Number(r.data.newReg)||0),0);
+
+  const urgents = weekReports.filter(r=>r.data.urgency==='red');
+
+  return (
+    <div className="fade-in">
+      <div className="card" style={{padding:16}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>📈 이번 주 요약</h3>
+        <div className="stat-grid">
+          <div style={{padding:10,background:'#EFF6FF',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:'var(--sky)'}}>{weekReports.length}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>총 보고</div>
+          </div>
+          <div style={{padding:10,background:'#FFF7ED',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:14,fontWeight:800,color:'var(--amber)'}}>{totalSales?totalSales.toLocaleString()+'원':'-'}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>주간 매출</div>
+          </div>
+          <div style={{padding:10,background:'#F0FDF4',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{totalReg}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>신규 등록</div>
+          </div>
+          <div style={{padding:10,background:urgents.length>0?'#FEF2F2':'#F0FDF4',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:800,color:urgents.length>0?'var(--red)':'var(--green)'}}>{urgents.length}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>긴급사항</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{padding:16,overflowX:'auto'}}>
+        <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>요일별 보고 현황</h3>
+        <table style={{width:'100%',fontSize:12,borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{borderBottom:'2px solid var(--border)'}}>
+              <th style={{padding:6,textAlign:'left'}}>부서</th>
+              {days.map(d=><th key={d} style={{padding:6,textAlign:'center'}}>{d}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {depts.map(dept=>(
+              <tr key={dept} style={{borderBottom:'1px solid var(--border)'}}>
+                <td style={{padding:6,fontWeight:600,color:DEPT_COLORS[dept]}}>{dept}</td>
+                {[0,1,2,3,4].map(di=>{
+                  const day = new Date(mon); day.setDate(mon.getDate()+di);
+                  const ds = day.toISOString().slice(0,10);
+                  const has = weekReports.some(r=>r.date===ds&&STAFF.find(s=>s.id===r.userId)?.dept===dept);
+                  return <td key={di} style={{padding:6,textAlign:'center'}}>{has?'🟢':'⚪'}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {urgents.length>0 && (
+        <div className="card" style={{padding:16,borderColor:'var(--red)'}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:'var(--red)',marginBottom:8}}>🚨 긴급사항 ({urgents.length}건)</h3>
+          {urgents.map((r,i)=>(
+            <div key={i} style={{padding:8,background:'#FEF2F2',borderRadius:8,marginBottom:6,fontSize:13}}>
+              <strong>{STAFF.find(s=>s.id===r.userId)?.name}</strong> ({r.date}): {r.data.note||r.data.damage||r.data.repairNote||'-'}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// EXEC SCREEN
+// ═══════════════════════════════════════════════════
+function ExecScreen({reports}){
+  return (
+    <div className="content fade-in">
+      <h2 style={{fontSize:16,fontWeight:700,marginBottom:16}}>📈 운영 현황 요약</h2>
+      <WeeklyReport reports={reports}/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS SCREEN
+// ═══════════════════════════════════════════════════
+function SettingsScreen({user, onLogout, reports, announcements}){
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const exportData = () => {
+    const data = {reports, announcements, exported: new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`PAB_백업_${DB.today()}.json`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = () => {
+    const input = document.createElement('input'); input.type='file'; input.accept='.json';
+    input.onchange = e => {
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if(data.reports) DB.set('reports', data.reports);
+          if(data.announcements) DB.set('announcements', data.announcements);
+          window.location.reload();
+        } catch{ alert('잘못된 파일입니다.'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  return (
+    <div className="content fade-in">
+      <div className="card" style={{padding:16}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
+          <div style={{width:44,height:44,borderRadius:22,background:'var(--sky)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:700}}>
+            {user.name[0]}
+          </div>
+          <div>
+            <div style={{fontWeight:700}}>{user.name}</div>
+            <div style={{fontSize:12,color:'var(--text2)'}}>{user.dept} · {user.role==='lead'?'운영팀장':user.role==='exec'?'운영진':'담당자'}</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style={{fontSize:14,fontWeight:700,margin:'16px 0 8px'}}>데이터 관리</h3>
+      <div className="card" style={{padding:0}}>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
+          onClick={exportData}>📤 데이터 백업 (JSON 다운로드)</button>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
+          onClick={importData}>📥 데이터 복원 (JSON 업로드)</button>
+        <button style={{width:'100%',padding:14,border:'none',background:'none',fontSize:14,textAlign:'left',color:'var(--text2)',cursor:'pointer'}}
+          onClick={()=>{}}>📊 보고 {reports.length}건 · 공지 {announcements.length}건</button>
+      </div>
+
+      <div style={{marginTop:24}}>
+        <button className="btn btn-outline btn-block" onClick={onLogout}>로그아웃</button>
+      </div>
+
+      <p style={{textAlign:'center',fontSize:11,color:'#bbb',marginTop:24}}>PAB 커뮤니케이션 v1.0</p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════
+function App(){
+  const [userId, setUserId] = useState(()=>DB.get('currentUser'));
+  const [reports, setReports] = useState(()=>DB.get('reports',[]));
+  const [announcements, setAnnouncements] = useState(()=>DB.get('announcements',[]));
+  const [activeTab, setActiveTab] = useState('home');
+  const [toast, setToast] = useState(null);
+
+  const user = STAFF.find(s=>s.id===userId);
+
+  useEffect(()=>{DB.set('reports',reports)},[reports]);
+  useEffect(()=>{DB.set('announcements',announcements)},[announcements]);
+
+  const login = (id) => { DB.set('currentUser',id); setUserId(id); setActiveTab('home'); };
+  const logout = () => { DB.set('currentUser',null); setUserId(null); };
+
+  const submitReport = (data) => {
+    const report = {userId, date:DB.today(), time:DB.now(), data};
+    setReports(prev=>[...prev, report]);
+    setToast({msg:'✅ 보고가 제출되었습니다!', type:'success'});
+  };
+
+  const addAnnouncement = (anno) => {
+    setAnnouncements(prev=>[...prev, anno]);
+    setToast({msg:'📢 공지가 발송되었습니다', type:'info'});
+  };
+
+  if(!userId) return <LoginScreen onLogin={login}/>;
+  if(!user) { logout(); return null; }
+
+  const todayUrgent = reports.filter(r=>r.date===DB.today()&&r.data.urgency==='red').length;
+  const todayAnnounce = announcements.filter(a=>a.date===DB.today()).length;
+
+  // Staff view
+  const navItems = user.role==='staff' ? [
+    {id:'home',icon:'📝',label:'보고'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ] : user.role==='lead' ? [
+    {id:'home',icon:'📊',label:'대시보드'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ] : [
+    {id:'home',icon:'📈',label:'현황'},
+    {id:'notice',icon:'📢',label:'공지'},
+    {id:'settings',icon:'⚙️',label:'설정'},
+  ];
+
+  return (
+    <div className="app">
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+
+      <div className="header">
+        <div className="header-inner">
+          <h1>🏊 PAB 커뮤니케이션</h1>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            {todayUrgent>0 && <span className="badge" style={{background:'#FEE2E2',color:'var(--red)'}}>🚨 {todayUrgent}</span>}
+            <span style={{fontSize:12,color:'var(--text2)'}}>{user.name}</span>
+          </div>
+        </div>
+        <div style={{fontSize:12,color:'var(--text2)',paddingBottom:8}}>{DB.todayLabel()}</div>
+      </div>
+
+      {activeTab==='home' && user.role==='staff' && <StaffScreen user={user} reports={reports} onSubmit={submitReport}/>}
+      {activeTab==='home' && user.role==='lead' && <LeadDashboard reports={reports} announcements={announcements} onAnnounce={addAnnouncement}/>}
+      {activeTab==='home' && user.role==='exec' && <ExecScreen reports={reports}/>}
+
+      {activeTab==='notice' && (
+        <div className="content fade-in">
+          <h2 style={{fontSize:16,fontWeight:700,marginBottom:12}}>📢 공지사항</h2>
+          {announcements.filter(a=>user.role!=='staff'||a.dept==='전체'||a.dept===user.dept).length===0 ? (
+            <div className="empty-state"><div className="icon">📢</div><p>공지사항이 없습니다</p></div>
+          ) : announcements.filter(a=>user.role!=='staff'||a.dept==='전체'||a.dept===user.dept).slice().reverse().map((a,i)=>(
+            <div key={i} className="card" style={{padding:12}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                <span className="badge" style={{background:'#EFF6FF',color:'var(--sky)'}}>{a.dept}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{a.date} {a.time}</span>
+              </div>
+              <p style={{fontSize:14,marginTop:8,lineHeight:1.5}}>{a.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab==='settings' && <SettingsScreen user={user} onLogout={logout} reports={reports} announcements={announcements}/>}
+
+      <div className="nav">
+        {navItems.map(item=>(
+          <button key={item.id} className={activeTab===item.id?'active':''} onClick={()=>setActiveTab(item.id)}>
+            <span className="icon">{item.icon}</span>
+            {item.label}
+            {item.id==='notice' && todayAnnounce>0 && <span className="notif">{todayAnnounce}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
