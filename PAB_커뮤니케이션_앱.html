@@ -51,23 +51,37 @@ textarea.input{resize:vertical;min-height:80px}
 .stat-card{padding:14px;border-radius:var(--radius);text-align:center}
 .stat-card .value{font-size:24px;font-weight:800}
 .stat-card .label{font-size:11px;color:var(--text2);margin-top:2px}
-.timeline-item{display:flex;gap:12px;padding:8px 0}
-.timeline-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
-.timeline-line{position:relative;padding-left:4px}
-.timeline-line::before{content:'';position:absolute;left:3.5px;top:14px;bottom:-8px;width:1px;background:var(--border)}
-.timeline-item:last-child .timeline-line::before{display:none}
 .fade-in{animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text2)}
 .empty-state .icon{font-size:48px;margin-bottom:12px}
 .tab-bar{display:flex;gap:4px;padding:4px;background:#f1f5f9;border-radius:10px;margin-bottom:16px}
-.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;white-space:nowrap}
 .tab-btn.active{background:#fff;color:var(--sky);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:flex-end;justify-content:center}
 .modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:200;animation:toastIn .3s ease}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .15s;background:#fff}
+.check-item:active{transform:scale(.98)}
+.check-item.checked{background:#F0FDF4;border-color:#86efac}
+.check-item .check-box{width:22px;height:22px;border-radius:6px;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:13px}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green);color:#fff}
+.check-item .check-label{font-size:13px;flex:1;line-height:1.4}
+.check-item.checked .check-label{color:var(--text2);text-decoration:line-through}
+.section-header{font-size:13px;font-weight:700;color:var(--text2);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.photo-thumb{width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover;border:1px solid var(--border)}
+.photo-add{width:100%;aspect-ratio:1;border-radius:8px;border:2px dashed #cbd5e1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:24px;color:#94a3b8;transition:all .2s;background:#f8fafc}
+.photo-add:active{background:#e2e8f0}
+.photo-add span{font-size:10px;margin-top:2px}
+.photo-wrap{position:relative}
+.photo-del{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.zone-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px;background:#fff}
+.zone-header{padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#fafbfc}
+.zone-header .count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.zone-body{padding:8px}
 </style>
 </head>
 <body>
@@ -100,6 +114,86 @@ const REPORT_DEADLINES = {
   machine:'09:00', clean:'09:30', swim_am:'14:00', swim_pm:'18:00', swim_kids:'18:00', mgr_chief:'18:00'
 };
 
+// ═══════════════════════════════════════════════════
+// 미화 체크리스트 데이터 (매뉴얼 기반)
+// ═══════════════════════════════════════════════════
+const CLEAN_CHECKLIST = {
+  hourly: {
+    label: '항시 점검 (매시간)',
+    icon: '🔄',
+    color: '#ef4444',
+    items: [
+      {id:'h1', zone:'계단/로비', text:'바닥 물기 제거'},
+      {id:'h2', zone:'계단/로비', text:'바닥 먼지 및 오염물 제거'},
+      {id:'h3', zone:'계단/로비', text:'안전 상태 점검 (결빙/미끄러움/장애물)'},
+      {id:'h4', zone:'탈의실', text:'바닥 타일 이물질 유무 확인'},
+      {id:'h5', zone:'탈의실', text:'바닥 미끄럼 여부 확인'},
+      {id:'h6', zone:'탈의실', text:'머리카락 청소'},
+      {id:'h7', zone:'탈의실', text:'녹/날카로운 부분 여부 확인'},
+      {id:'h8', zone:'샤워실', text:'바닥 물기 제거'},
+      {id:'h9', zone:'화장실', text:'문 손잡이/걸쇠 정상 작동 확인'},
+      {id:'h10', zone:'화장실', text:'날카로운 이물질 여부 확인'},
+    ]
+  },
+  daily: {
+    label: '일일 체크리스트 (출근/퇴근)',
+    icon: '📋',
+    color: '#0ea5e9',
+    items: [
+      {id:'d1', zone:'입구/중간문', text:'입구 계단 전체 청소'},
+      {id:'d2', zone:'입구/중간문', text:'중간문 공간 청소 (악취관리, 바닥)'},
+      {id:'d3', zone:'탈의실', text:'발수건 세탁 및 교체'},
+      {id:'d4', zone:'탈의실', text:'사물함 내부 먼지/쓰레기 정리'},
+      {id:'d5', zone:'탈의실', text:'선풍기/헤어드라이어 먼지 제거'},
+      {id:'d6', zone:'탈의실', text:'쓰레기통 비우기'},
+      {id:'d7', zone:'탈의실', text:'정수기 컵 관리'},
+      {id:'d8', zone:'샤워실', text:'하수구 청결 관리'},
+      {id:'d9', zone:'샤워실', text:'전체 바닥 물&세제 청소'},
+      {id:'d10', zone:'샤워실', text:'거울 물때 제거'},
+      {id:'d11', zone:'샤워실', text:'바닥 상태 점검'},
+      {id:'d12', zone:'샤워실', text:'쓰레기통 비우기'},
+      {id:'d13', zone:'샤워실', text:'물품 보관대 청결 유지'},
+      {id:'d14', zone:'화장실', text:'소변기/좌변기 청소 및 막힘 해결'},
+      {id:'d15', zone:'화장실', text:'세면대/거울 청소'},
+      {id:'d16', zone:'화장실', text:'전체 바닥 물청소'},
+      {id:'d17', zone:'화장실', text:'하수구 관리 / 악취 관리'},
+      {id:'d18', zone:'화장실', text:'쓰레기통 비우기'},
+      {id:'d19', zone:'수영장', text:'중간문 신발장 먼지/흙 제거 및 신발 정리'},
+      {id:'d20', zone:'수영장', text:'청소 도구함 주변 정리'},
+      {id:'d21', zone:'수영장', text:'유리문 경첩 녹 관리, 유리 관리'},
+      {id:'d22', zone:'수영장', text:'바닥 발판 관리'},
+      {id:'d23', zone:'지하', text:'기계실 복도 계단 먼지 청소'},
+      {id:'d24', zone:'지하', text:'약품 보관실 바닥 청소'},
+    ]
+  },
+  weekly: {
+    label: '주간 체크리스트 (주 1회)',
+    icon: '📅',
+    color: '#8b5cf6',
+    items: [
+      {id:'w1', zone:'샤워실', text:'타일 곰팡이 제거'},
+      {id:'w2', zone:'수영장', text:'커튼 곰팡이 관리'},
+      {id:'w3', zone:'수영장', text:'바닥 물때/줄눈 곰팡이/오염 제거'},
+      {id:'w4', zone:'수영장', text:'바닥 타일 상태 점검 (깨짐/벗겨짐)'},
+      {id:'w5', zone:'수영장', text:'다이빙 대 녹/곰팡이 제거'},
+      {id:'w6', zone:'수영장', text:'내부 사무실 문틀 녹/곰팡이 제거'},
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// 매니저 퇴근전 체크리스트 (매뉴얼 기반)
+// ═══════════════════════════════════════════════════
+const MGR_CHECKLIST = [
+  {id:'mc1', text:'카카오비즈니스 답장 완료 여부 확인'},
+  {id:'mc2', text:'자리 정리'},
+  {id:'mc3', text:'정산 확인 후 오전/오후 정산 마감'},
+  {id:'mc4', text:'비품 소진 전 팀장님께 물품 신청'},
+  {id:'mc5', text:'오늘 날짜 신청서 → 오른쪽(당월) 이동'},
+  {id:'mc6', text:'분실물 보관함 확인 (월요일)'},
+  {id:'mc7', text:'만료 락커(파란색) 안내 확인'},
+];
+
 // localStorage helpers
 const DB = {
   get(key, def=null){ try{const v=localStorage.getItem('pab_'+key);return v?JSON.parse(v):def}catch{return def} },
@@ -119,6 +213,25 @@ function Toast({msg, type='success', onClose}){
 }
 
 // ═══════════════════════════════════════════════════
+// URGENCY SELECTOR
+// ═══════════════════════════════════════════════════
+function UrgencySelect({value, onChange}){
+  return (
+    <div className="form-group">
+      <label className="label">긴급도</label>
+      <div className="urgency-select">
+        {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
+          <div key={k} className={`urgency-opt ${value===k?'selected':''}`}
+            style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
+              borderColor:value===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
+            onClick={()=>onChange(k)}>{l}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════════
 function LoginScreen({onLogin}){
@@ -128,7 +241,7 @@ function LoginScreen({onLogin}){
       <div style={{textAlign:'center',marginBottom:40}}>
         <div style={{fontSize:48,marginBottom:12}}>🏊</div>
         <h1 style={{fontSize:24,fontWeight:800,color:'var(--sky)'}}>PAB 커뮤니케이션</h1>
-        <p style={{color:'var(--text2)',marginTop:8,fontSize:14}}>수영장 운영 보고·소통 시스템</p>
+        <p style={{color:'var(--text2)',marginTop:8,fontSize:14}}>수영장 운영 보고 · 소통 시스템</p>
       </div>
       <div className="card" style={{padding:24}}>
         <div className="form-group">
@@ -153,7 +266,68 @@ function LoginScreen({onLogin}){
           로그인
         </button>
       </div>
-      <p style={{textAlign:'center',fontSize:11,color:'#aaa',marginTop:24}}>PAB 커뮤니케이션 v1.0</p>
+      <p style={{textAlign:'center',fontSize:11,color:'#aaa',marginTop:24}}>PAB 커뮤니케이션 v2.0</p>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// PHOTO UPLOADER
+// ═══════════════════════════════════════════════════
+function PhotoUploader({photos, onChange, label}){
+  const fileRef = useRef(null);
+
+  const addPhoto = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        // Resize for storage
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max = 800;
+          let w = img.width, h = img.height;
+          if(w > max || h > max){
+            if(w > h){ h = h * max / w; w = max; }
+            else{ w = w * max / h; h = max; }
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          onChange([...photos, {data: dataUrl, time: DB.now(), name: file.name}]);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const removePhoto = (idx) => {
+    onChange(photos.filter((_,i) => i !== idx));
+  };
+
+  return (
+    <div className="form-group">
+      <label className="label">{label || '사진 촬영/업로드'}</label>
+      <div className="photo-grid">
+        {photos.map((p,i) => (
+          <div key={i} className="photo-wrap">
+            <img src={p.data} className="photo-thumb" alt={`사진 ${i+1}`}/>
+            <button className="photo-del" onClick={()=>removePhoto(i)}>×</button>
+          </div>
+        ))}
+        <div className="photo-add" onClick={()=>fileRef.current?.click()}>
+          📷<span>추가</span>
+        </div>
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" multiple
+        style={{display:'none'}} onChange={addPhoto}/>
+      <p style={{fontSize:11,color:'var(--text2)',marginTop:6}}>
+        카메라 촬영 또는 갤러리에서 선택 ({photos.length}장)
+      </p>
     </div>
   );
 }
@@ -179,24 +353,14 @@ function SwimmingForm({user, onSubmit}){
       <div className="form-group">
         <label className="label">민원 유무</label>
         <select className="input" value={data.complaint} onChange={e=>set('complaint',e.target.value)}>
-          <option>없음</option><option>있음</option>
+          <option>없음</option><option>있음 - 내용 특이사항에 기재</option>
         </select>
       </div>
       <div className="form-group">
         <label className="label">특이사항</label>
         <textarea className="input" placeholder="특이사항을 입력하세요 (없으면 '없음')" value={data.note} onChange={e=>set('note',e.target.value)}/>
       </div>
-      <div className="form-group">
-        <label className="label">긴급도</label>
-        <div className="urgency-select">
-          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
-            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
-              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
-                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
-              onClick={()=>set('urgency',k)}>{l}</div>
-          )}
-        </div>
-      </div>
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
       <button className="btn btn-primary btn-block" disabled={!data.attendance}
         onClick={()=>onSubmit({...data,formType:'swimming'})}>보고 제출</button>
     </div>
@@ -204,93 +368,187 @@ function SwimmingForm({user, onSubmit}){
 }
 
 function ManagerForm({user, onSubmit}){
-  const [data, setData] = useState({sales:'',newReg:'',memberNote:'',facilityNote:'',urgency:'green'});
+  const [data, setData] = useState({sales:'',newReg:'',reReg:'',memberNote:'',facilityNote:'',urgency:'green'});
+  const [checks, setChecks] = useState({});
   const set = (k,v) => setData(p=>({...p,[k]:v}));
+  const toggleCheck = (id) => setChecks(p=>({...p,[id]:!p[id]}));
+  const checkedCount = MGR_CHECKLIST.filter(c=>checks[c.id]).length;
+
   return (
     <div className="fade-in">
       <div className="form-group">
         <label className="label">오늘 총 매출 (원)</label>
         <input className="input" type="number" placeholder="예: 1500000" value={data.sales} onChange={e=>set('sales',e.target.value)}/>
       </div>
-      <div className="form-group">
-        <label className="label">신규 등록 건수</label>
-        <input className="input" type="number" placeholder="예: 3" value={data.newReg} onChange={e=>set('newReg',e.target.value)}/>
-      </div>
-      <div className="form-group">
-        <label className="label">회원 동향 / 특이사항</label>
-        <textarea className="input" placeholder="회원 동향, 민원 등" value={data.memberNote} onChange={e=>set('memberNote',e.target.value)}/>
-      </div>
-      <div className="form-group">
-        <label className="label">시설 민원</label>
-        <textarea className="input" placeholder="없으면 '없음'" value={data.facilityNote} onChange={e=>set('facilityNote',e.target.value)}/>
-      </div>
-      <div className="form-group">
-        <label className="label">긴급도</label>
-        <div className="urgency-select">
-          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
-            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
-              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
-                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
-              onClick={()=>set('urgency',k)}>{l}</div>
-          )}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+        <div className="form-group">
+          <label className="label">신규 등록 (건)</label>
+          <input className="input" type="number" placeholder="0" value={data.newReg} onChange={e=>set('newReg',e.target.value)}/>
+        </div>
+        <div className="form-group">
+          <label className="label">재등록 (건)</label>
+          <input className="input" type="number" placeholder="0" value={data.reReg} onChange={e=>set('reReg',e.target.value)}/>
         </div>
       </div>
-      <button className="btn btn-primary btn-block" disabled={!data.sales}
-        onClick={()=>onSubmit({...data,formType:'manager'})}>보고 제출</button>
+      <div className="form-group">
+        <label className="label">회원 동향 / 민원</label>
+        <textarea className="input" placeholder="회원 동향, 민원, UB 이상 등" value={data.memberNote} onChange={e=>set('memberNote',e.target.value)}/>
+      </div>
+      <div className="form-group">
+        <label className="label">시설 민원 / 비품 현황</label>
+        <textarea className="input" placeholder="없으면 '없음' / 부족 비품 기재" value={data.facilityNote} onChange={e=>set('facilityNote',e.target.value)}/>
+      </div>
+
+      <div className="section-header">✅ 퇴근 전 체크리스트 ({checkedCount}/{MGR_CHECKLIST.length})</div>
+      {MGR_CHECKLIST.map(c=>(
+        <div key={c.id} className={`check-item ${checks[c.id]?'checked':''}`} onClick={()=>toggleCheck(c.id)}>
+          <div className="check-box">{checks[c.id]?'✓':''}</div>
+          <div className="check-label">{c.text}</div>
+        </div>
+      ))}
+
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
+      <button className="btn btn-primary btn-block" disabled={!data.sales} style={{marginTop:12}}
+        onClick={()=>onSubmit({...data,formType:'manager',checklist:checks,checklistDone:checkedCount,checklistTotal:MGR_CHECKLIST.length})}>보고 제출</button>
     </div>
   );
 }
 
+// ═══════════════════════════════════════════════════
+// CLEANING FORM (미화 - 체크리스트 + 사진)
+// ═══════════════════════════════════════════════════
 function CleaningForm({user, onSubmit}){
-  const [data, setData] = useState({locker:'완료',pool:'완료',shower:'완료',supplies:'',damage:'',urgency:'green'});
-  const set = (k,v) => setData(p=>({...p,[k]:v}));
-  const opts = ['완료','미완료','보수필요'];
+  const [tab, setTab] = useState('hourly');
+  const [checks, setChecks] = useState({});
+  const [photos, setPhotos] = useState([]);
+  const [zonePhotos, setZonePhotos] = useState({});
+  const [note, setNote] = useState('');
+  const [urgency, setUrgency] = useState('green');
+  const [openZones, setOpenZones] = useState({});
+
+  const toggleCheck = (id) => setChecks(p=>({...p,[id]:!p[id]}));
+  const toggleZone = (z) => setOpenZones(p=>({...p,[z]:!p[z]}));
+
+  const currentList = CLEAN_CHECKLIST[tab];
+  const zones = [...new Set(currentList.items.map(i=>i.zone))];
+  const totalItems = currentList.items.length;
+  const checkedItems = currentList.items.filter(i=>checks[i.id]).length;
+
+  const allChecked = Object.values(CLEAN_CHECKLIST).reduce((sum, cat) => {
+    return sum + cat.items.filter(i=>checks[i.id]).length;
+  }, 0);
+  const allTotal = Object.values(CLEAN_CHECKLIST).reduce((sum, cat) => sum + cat.items.length, 0);
+
+  const setZonePhoto = (zone, p) => setZonePhotos(prev=>({...prev,[zone]:p}));
+
   return (
     <div className="fade-in">
-      {[['locker','탈의실 청소'],['pool','풀장 주변 청소'],['shower','샤워실 청소']].map(([k,l])=>
-        <div key={k} className="form-group">
-          <label className="label">{l}</label>
-          <select className="input" value={data[k]} onChange={e=>set(k,e.target.value)}>
-            {opts.map(o=><option key={o}>{o}</option>)}
-          </select>
-        </div>
-      )}
-      <div className="form-group">
-        <label className="label">소모품 현황</label>
-        <textarea className="input" placeholder="부족 품목 기재" value={data.supplies} onChange={e=>set('supplies',e.target.value)}/>
-      </div>
-      <div className="form-group">
-        <label className="label">시설 파손/이상</label>
-        <textarea className="input" placeholder="없으면 '없음'" value={data.damage} onChange={e=>set('damage',e.target.value)}/>
-      </div>
-      <div className="form-group">
-        <label className="label">긴급도</label>
-        <div className="urgency-select">
-          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
-            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
-              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
-                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
-              onClick={()=>set('urgency',k)}>{l}</div>
-          )}
+      <div className="card" style={{padding:12,textAlign:'center',background:'linear-gradient(135deg,#f0f9ff,#faf5ff)'}}>
+        <div style={{fontSize:28,fontWeight:800,color:'var(--purple)'}}>{allChecked}/{allTotal}</div>
+        <div style={{fontSize:12,color:'var(--text2)'}}>전체 점검 완료</div>
+        <div className="progress-bar" style={{marginTop:8}}>
+          <div className="progress-fill" style={{width:`${allChecked/allTotal*100}%`,background:'var(--purple)'}}/>
         </div>
       </div>
-      <button className="btn btn-primary btn-block" onClick={()=>onSubmit({...data,formType:'cleaning'})}>보고 제출</button>
+
+      <div className="tab-bar">
+        {Object.entries(CLEAN_CHECKLIST).map(([key,cat])=>{
+          const done = cat.items.filter(i=>checks[i.id]).length;
+          return (
+            <button key={key} className={`tab-btn ${tab===key?'active':''}`} onClick={()=>setTab(key)}>
+              {cat.icon} {done}/{cat.items.length}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{fontSize:14,fontWeight:700,marginBottom:10,display:'flex',alignItems:'center',gap:6}}>
+        <span style={{color:currentList.color}}>{currentList.icon}</span> {currentList.label}
+        <span className="badge" style={{background:checkedItems===totalItems?'#D1FAE5':'#FEF3C7',
+          color:checkedItems===totalItems?'var(--green)':'var(--amber)',marginLeft:'auto'}}>
+          {checkedItems}/{totalItems}
+        </span>
+      </div>
+
+      {zones.map(zone => {
+        const zoneItems = currentList.items.filter(i=>i.zone===zone);
+        const zoneDone = zoneItems.filter(i=>checks[i.id]).length;
+        const isOpen = openZones[zone] !== false;
+        const zp = zonePhotos[zone] || [];
+
+        return (
+          <div key={zone} className="zone-card">
+            <div className="zone-header" onClick={()=>toggleZone(zone)}>
+              <span>{isOpen?'▼':'▶'} {zone}</span>
+              <span className="count" style={{
+                background:zoneDone===zoneItems.length?'#D1FAE5':'#F1F5F9',
+                color:zoneDone===zoneItems.length?'var(--green)':'var(--text2)'
+              }}>{zoneDone}/{zoneItems.length}</span>
+            </div>
+            {isOpen && (
+              <div className="zone-body">
+                {zoneItems.map(item=>(
+                  <div key={item.id} className={`check-item ${checks[item.id]?'checked':''}`}
+                    onClick={()=>toggleCheck(item.id)}>
+                    <div className="check-box">{checks[item.id]?'✓':''}</div>
+                    <div className="check-label">{item.text}</div>
+                  </div>
+                ))}
+                <div style={{padding:'4px 4px 0'}}>
+                  <PhotoUploader photos={zp} onChange={(p)=>setZonePhoto(zone,p)}
+                    label={`📷 ${zone} 사진`}/>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      <div className="section-header">📷 전체 완료 사진</div>
+      <PhotoUploader photos={photos} onChange={setPhotos} label="청소 완료 전체 사진"/>
+
+      <div className="form-group">
+        <label className="label">특이사항 / 수리 필요 사항</label>
+        <textarea className="input" placeholder="파손, 악취, 수리 필요 등 (없으면 '없음')" value={note} onChange={e=>setNote(e.target.value)}/>
+      </div>
+      <UrgencySelect value={urgency} onChange={setUrgency}/>
+      <button className="btn btn-primary btn-block" style={{marginTop:8}}
+        onClick={()=>onSubmit({
+          formType:'cleaning',
+          checklist:checks,
+          checklistDone:allChecked,
+          checklistTotal:allTotal,
+          photos:photos.length,
+          zonePhotos:Object.fromEntries(Object.entries(zonePhotos).map(([k,v])=>[k,v.length])),
+          note,
+          urgency,
+          _photos:photos,
+          _zonePhotos:zonePhotos
+        })}>
+        보고 제출 ({allChecked}/{allTotal} 완료, 사진 {photos.length + Object.values(zonePhotos).reduce((s,a)=>s+a.length,0)}장)
+      </button>
     </div>
   );
 }
 
 function MachineForm({user, onSubmit}){
-  const [data, setData] = useState({ph:'',chlorine:'',machineStatus:'정상',repairNote:'',urgency:'green'});
+  const [data, setData] = useState({ph:'',chlorine:'',temp:'',machineStatus:'정상',repairNote:'',urgency:'green'});
   const set = (k,v) => setData(p=>({...p,[k]:v}));
   return (
     <div className="fade-in">
-      <div className="form-group">
-        <label className="label">수질 pH</label>
-        <input className="input" type="number" step="0.1" placeholder="예: 7.2" value={data.ph} onChange={e=>set('ph',e.target.value)}/>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+        <div className="form-group">
+          <label className="label">수질 pH</label>
+          <input className="input" type="number" step="0.1" placeholder="예: 7.2" value={data.ph} onChange={e=>set('ph',e.target.value)}/>
+        </div>
+        <div className="form-group">
+          <label className="label">잔류염소 (ppm)</label>
+          <input className="input" type="number" step="0.1" placeholder="예: 0.8" value={data.chlorine} onChange={e=>set('chlorine',e.target.value)}/>
+        </div>
       </div>
       <div className="form-group">
-        <label className="label">잔류염소 (ppm)</label>
-        <input className="input" type="number" step="0.1" placeholder="예: 0.8" value={data.chlorine} onChange={e=>set('chlorine',e.target.value)}/>
+        <label className="label">수온 (°C)</label>
+        <input className="input" type="number" step="0.1" placeholder="예: 28.5" value={data.temp} onChange={e=>set('temp',e.target.value)}/>
       </div>
       <div className="form-group">
         <label className="label">기계 상태</label>
@@ -302,17 +560,7 @@ function MachineForm({user, onSubmit}){
         <label className="label">수리/점검 현황</label>
         <textarea className="input" placeholder="없으면 '없음'" value={data.repairNote} onChange={e=>set('repairNote',e.target.value)}/>
       </div>
-      <div className="form-group">
-        <label className="label">긴급도</label>
-        <div className="urgency-select">
-          {[['green','🟢 일반'],['yellow','🟡 주의'],['red','🔴 긴급']].map(([k,l])=>
-            <div key={k} className={`urgency-opt ${data.urgency===k?'selected':''}`}
-              style={{color:k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)',
-                borderColor:data.urgency===k?(k==='green'?'var(--green)':k==='yellow'?'var(--amber)':'var(--red)'):'var(--border)'}}
-              onClick={()=>set('urgency',k)}>{l}</div>
-          )}
-        </div>
-      </div>
+      <UrgencySelect value={data.urgency} onChange={v=>set('urgency',v)}/>
       <button className="btn btn-primary btn-block" disabled={!data.ph||!data.chlorine}
         onClick={()=>onSubmit({...data,formType:'machine'})}>보고 제출</button>
     </div>
@@ -366,6 +614,12 @@ function StaffScreen({user, reports, onSubmit}){
             <div style={{fontSize:48,marginBottom:12}}>✅</div>
             <h3 style={{fontSize:16,fontWeight:700}}>오늘 보고 완료</h3>
             <p style={{color:'var(--text2)',fontSize:13,marginTop:8}}>제출 시간: {todayReport.time}</p>
+            {todayReport.data.checklistDone != null && (
+              <p style={{color:'var(--text2)',fontSize:13}}>체크리스트: {todayReport.data.checklistDone}/{todayReport.data.checklistTotal} 완료</p>
+            )}
+            {todayReport.data.photos != null && (
+              <p style={{color:'var(--text2)',fontSize:13}}>사진: {todayReport.data.photos + Object.values(todayReport.data.zonePhotos||{}).reduce((s,n)=>s+n,0)}장 첨부</p>
+            )}
             <p style={{color:'var(--text2)',fontSize:13}}>긴급도: {todayReport.data.urgency==='green'?'🟢 일반':todayReport.data.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</p>
           </div>
         ) : FormComponent ? <FormComponent user={user} onSubmit={onSubmit}/> : null
@@ -383,10 +637,90 @@ function StaffScreen({user, reports, onSubmit}){
                 {r.data.urgency==='green'?'일반':r.data.urgency==='yellow'?'주의':'긴급'}
               </span>
             </div>
-            <p style={{fontSize:12,color:'var(--text2)'}}>제출: {r.time}</p>
+            <p style={{fontSize:12,color:'var(--text2)'}}>제출: {r.time}
+              {r.data.checklistDone != null && ` | 체크 ${r.data.checklistDone}/${r.data.checklistTotal}`}
+              {r.data.photos != null && ` | 사진 ${r.data.photos}장`}
+            </p>
           </div>
         ))
       )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// REPORT DETAIL MODAL
+// ═══════════════════════════════════════════════════
+function ReportDetailModal({report, onClose}){
+  if(!report) return null;
+  const staff = STAFF.find(s=>s.id===report.userId);
+  const d = report.data;
+
+  const fieldLabels = {
+    attendance:'출석 인원', classStatus:'수업 상태', complaint:'민원', sales:'매출',
+    newReg:'신규등록', reReg:'재등록', memberNote:'회원 동향', facilityNote:'시설/비품',
+    ph:'수질 pH', chlorine:'잔류염소', temp:'수온', machineStatus:'기계 상태',
+    repairNote:'수리/점검', pending:'미처리 건', caution:'주의사항', note:'특이사항'
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h3 style={{fontSize:16,fontWeight:700}}>📋 보고 상세</h3>
+          <button onClick={onClose} style={{border:'none',background:'none',fontSize:20,cursor:'pointer'}}>✕</button>
+        </div>
+        <div style={{marginBottom:8}}>
+          <span className="badge" style={{background:(DEPT_COLORS[staff?.dept]||'#666')+'20',color:DEPT_COLORS[staff?.dept]}}>
+            {staff?.dept}
+          </span>
+          <span style={{fontSize:13,fontWeight:600,marginLeft:8}}>{staff?.name}</span>
+        </div>
+        <p style={{fontSize:12,color:'var(--text2)',marginBottom:16}}>{report.date} {report.time}</p>
+
+        {Object.entries(d).filter(([k])=>!['formType','urgency','checklist','_photos','_zonePhotos','checklistDone','checklistTotal','photos','zonePhotos'].includes(k)).map(([k,v])=>
+          v ? <div key={k} style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>{fieldLabels[k]||k}</div>
+            <div style={{fontSize:14}}>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</div>
+          </div> : null
+        )}
+
+        {d.checklistDone != null && (
+          <div style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>체크리스트</div>
+            <div style={{fontSize:14}}>{d.checklistDone}/{d.checklistTotal} 완료
+              <div className="progress-bar" style={{marginTop:4}}>
+                <div className="progress-fill" style={{width:`${d.checklistDone/d.checklistTotal*100}%`,background:'var(--green)'}}/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {d._photos && d._photos.length > 0 && (
+          <div style={{padding:'8px 0'}}>
+            <div style={{fontSize:11,color:'var(--text2)',marginBottom:6}}>첨부 사진</div>
+            <div className="photo-grid">
+              {d._photos.map((p,i) => <img key={i} src={p.data} className="photo-thumb" alt={`사진${i+1}`}/>)}
+            </div>
+          </div>
+        )}
+
+        {d._zonePhotos && Object.entries(d._zonePhotos).map(([zone, zPhotos]) =>
+          zPhotos.length > 0 ? (
+            <div key={zone} style={{padding:'8px 0'}}>
+              <div style={{fontSize:11,color:'var(--text2)',marginBottom:6}}>📷 {zone} 사진</div>
+              <div className="photo-grid">
+                {zPhotos.map((p,i) => <img key={i} src={p.data} className="photo-thumb" alt={`${zone} ${i+1}`}/>)}
+              </div>
+            </div>
+          ) : null
+        )}
+
+        <div style={{padding:'8px 0'}}>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>긴급도</div>
+          <div style={{fontSize:14}}>{d.urgency==='green'?'🟢 일반':d.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -411,13 +745,15 @@ function LeadDashboard({reports, announcements, onAnnounce}){
   const doneCount = reportStatus.filter(r=>r.report).length;
   const urgentCount = todayReports.filter(r=>r.data.urgency==='red').length;
 
-  // Weekly sales
   const weekReports = reports.filter(r=>{
     const d=new Date(r.date),now=new Date(),mon=new Date(now);
     mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);
     return d>=mon && r.data.formType==='manager';
   });
   const weeklySales = weekReports.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
+
+  // 미화 체크리스트 현황
+  const cleanReport = todayReports.find(r=>r.data.formType==='cleaning');
 
   return (
     <div className="content fade-in">
@@ -444,8 +780,8 @@ function LeadDashboard({reports, announcements, onAnnounce}){
             <div className="label">주간 매출</div>
           </div>
           <div className="stat-card" style={{background:'#F5F3FF'}}>
-            <div className="value" style={{color:'var(--purple)'}}>{todayReports.length}</div>
-            <div className="label">오늘 총 보고</div>
+            <div className="value" style={{color:'var(--purple)'}}>{cleanReport?`${cleanReport.data.checklistDone||0}/${cleanReport.data.checklistTotal||0}`:'-'}</div>
+            <div className="label">미화 체크</div>
           </div>
         </div>
 
@@ -456,42 +792,19 @@ function LeadDashboard({reports, announcements, onAnnounce}){
             <div className="dot" style={{background:report?'var(--green)':'#cbd5e1'}}/>
             <div style={{flex:1}}>
               <div style={{fontSize:13,fontWeight:600}}>{staff.name}</div>
-              <div style={{fontSize:11,color:'var(--text2)'}}>{staff.dept} · 마감 {deadline}</div>
+              <div style={{fontSize:11,color:'var(--text2)'}}>{staff.dept} · 마감 {deadline}
+                {report?.data.checklistDone != null && ` · 체크 ${report.data.checklistDone}/${report.data.checklistTotal}`}
+              </div>
             </div>
-            <span className="badge" style={{background:report?'#D1FAE5':'#F1F5F9',color:report?'var(--green)':'#94a3b8',fontSize:11}}>
+            <span className="badge" style={{background:report?
+              (report.data.urgency==='red'?'#FEE2E2':report.data.urgency==='yellow'?'#FEF3C7':'#D1FAE5'):'#F1F5F9',
+              color:report?(report.data.urgency==='red'?'var(--red)':report.data.urgency==='yellow'?'var(--amber)':'var(--green)'):'#94a3b8',fontSize:11}}>
               {report?`${report.time} 완료`:'대기'}
             </span>
           </div>
         ))}
 
-        {selectedReport && (
-          <div className="modal-overlay" onClick={()=>setSelectedReport(null)}>
-            <div className="modal" onClick={e=>e.stopPropagation()}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                <h3 style={{fontSize:16,fontWeight:700}}>📋 보고 상세</h3>
-                <button onClick={()=>setSelectedReport(null)} style={{border:'none',background:'none',fontSize:20,cursor:'pointer'}}>✕</button>
-              </div>
-              <div style={{marginBottom:8}}>
-                <span className="badge" style={{background:DEPT_COLORS[STAFF.find(s=>s.id===selectedReport.userId)?.dept]+'20',
-                  color:DEPT_COLORS[STAFF.find(s=>s.id===selectedReport.userId)?.dept]}}>
-                  {STAFF.find(s=>s.id===selectedReport.userId)?.dept}
-                </span>
-                <span style={{fontSize:13,fontWeight:600,marginLeft:8}}>{STAFF.find(s=>s.id===selectedReport.userId)?.name}</span>
-              </div>
-              <p style={{fontSize:12,color:'var(--text2)',marginBottom:16}}>{selectedReport.date} {selectedReport.time}</p>
-              {Object.entries(selectedReport.data).filter(([k])=>!['formType','urgency'].includes(k)).map(([k,v])=>
-                v ? <div key={k} style={{padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
-                  <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>{k}</div>
-                  <div style={{fontSize:14}}>{v}</div>
-                </div> : null
-              )}
-              <div style={{padding:'8px 0'}}>
-                <div style={{fontSize:11,color:'var(--text2)',marginBottom:2}}>긴급도</div>
-                <div style={{fontSize:14}}>{selectedReport.data.urgency==='green'?'🟢 일반':selectedReport.data.urgency==='yellow'?'🟡 주의':'🔴 긴급'}</div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ReportDetailModal report={selectedReport} onClose={()=>setSelectedReport(null)}/>
       </>}
 
       {tab==='reports' && <>
@@ -507,9 +820,15 @@ function LeadDashboard({reports, announcements, onAnnounce}){
                 <span style={{fontSize:13,fontWeight:600,flex:1}}>{staff?.name}</span>
                 <span style={{fontSize:11,color:'var(--text2)'}}>{r.date} {r.time}</span>
               </div>
+              {r.data.checklistDone != null && (
+                <div style={{marginTop:4}}>
+                  <div className="progress-bar"><div className="progress-fill" style={{width:`${r.data.checklistDone/r.data.checklistTotal*100}%`,background:r.data.formType==='cleaning'?'var(--purple)':'var(--green)'}}/></div>
+                </div>
+              )}
             </div>
           );
         })}
+        <ReportDetailModal report={selectedReport} onClose={()=>setSelectedReport(null)}/>
       </>}
 
       {tab==='weekly' && <WeeklyReport reports={reports}/>}
@@ -560,6 +879,7 @@ function WeeklyReport({reports}){
   const salesData = weekReports.filter(r=>r.data.formType==='manager');
   const totalSales = salesData.reduce((s,r)=>s+(Number(r.data.sales)||0),0);
   const totalReg = salesData.reduce((s,r)=>s+(Number(r.data.newReg)||0),0);
+  const totalReReg = salesData.reduce((s,r)=>s+(Number(r.data.reReg)||0),0);
 
   const urgents = weekReports.filter(r=>r.data.urgency==='red');
 
@@ -577,8 +897,8 @@ function WeeklyReport({reports}){
             <div style={{fontSize:11,color:'var(--text2)'}}>주간 매출</div>
           </div>
           <div style={{padding:10,background:'#F0FDF4',borderRadius:8,textAlign:'center'}}>
-            <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{totalReg}</div>
-            <div style={{fontSize:11,color:'var(--text2)'}}>신규 등록</div>
+            <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{totalReg} / {totalReReg}</div>
+            <div style={{fontSize:11,color:'var(--text2)'}}>신규 / 재등록</div>
           </div>
           <div style={{padding:10,background:urgents.length>0?'#FEF2F2':'#F0FDF4',borderRadius:8,textAlign:'center'}}>
             <div style={{fontSize:18,fontWeight:800,color:urgents.length>0?'var(--red)':'var(--green)'}}>{urgents.length}</div>
@@ -642,10 +962,12 @@ function ExecScreen({reports}){
 // SETTINGS SCREEN
 // ═══════════════════════════════════════════════════
 function SettingsScreen({user, onLogout, reports, announcements}){
-  const [showConfirm, setShowConfirm] = useState(false);
-
   const exportData = () => {
-    const data = {reports, announcements, exported: new Date().toISOString()};
+    const data = {reports: reports.map(r => {
+      const d = {...r.data};
+      delete d._photos; delete d._zonePhotos;
+      return {...r, data: d};
+    }), announcements, exported: new Date().toISOString()};
     const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download=`PAB_백업_${DB.today()}.json`; a.click();
@@ -674,7 +996,7 @@ function SettingsScreen({user, onLogout, reports, announcements}){
     <div className="content fade-in">
       <div className="card" style={{padding:16}}>
         <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
-          <div style={{width:44,height:44,borderRadius:22,background:'var(--sky)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:700}}>
+          <div style={{width:44,height:44,borderRadius:22,background:DEPT_COLORS[user.dept]||'var(--sky)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:700}}>
             {user.name[0]}
           </div>
           <div>
@@ -697,8 +1019,7 @@ function SettingsScreen({user, onLogout, reports, announcements}){
       <div style={{marginTop:24}}>
         <button className="btn btn-outline btn-block" onClick={onLogout}>로그아웃</button>
       </div>
-
-      <p style={{textAlign:'center',fontSize:11,color:'#bbb',marginTop:24}}>PAB 커뮤니케이션 v1.0</p>
+      <p style={{textAlign:'center',fontSize:11,color:'#bbb',marginTop:24}}>PAB 커뮤니케이션 v2.0</p>
     </div>
   );
 }
@@ -715,7 +1036,15 @@ function App(){
 
   const user = STAFF.find(s=>s.id===userId);
 
-  useEffect(()=>{DB.set('reports',reports)},[reports]);
+  useEffect(()=>{
+    // Save reports without photo data to localStorage (photos are too large)
+    const lite = reports.map(r => {
+      const d = {...r.data};
+      delete d._photos; delete d._zonePhotos;
+      return {...r, data: d};
+    });
+    DB.set('reports', lite);
+  },[reports]);
   useEffect(()=>{DB.set('announcements',announcements)},[announcements]);
 
   const login = (id) => { DB.set('currentUser',id); setUserId(id); setActiveTab('home'); };
@@ -738,7 +1067,6 @@ function App(){
   const todayUrgent = reports.filter(r=>r.date===DB.today()&&r.data.urgency==='red').length;
   const todayAnnounce = announcements.filter(a=>a.date===DB.today()).length;
 
-  // Staff view
   const navItems = user.role==='staff' ? [
     {id:'home',icon:'📝',label:'보고'},
     {id:'notice',icon:'📢',label:'공지'},
