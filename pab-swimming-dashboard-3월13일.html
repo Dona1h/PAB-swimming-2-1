@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAB 성인 수영 전체 등록 현황 (3월 13일)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #1e272e 0%, #2c3e50 100%);
+      min-height: 100vh; padding: 28px 20px; color: #ecf0f1;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { font-size: 28px; font-weight: 700; color: #ecf0f1; margin: 0; letter-spacing: -0.5px; }
+    .header p { color: #95a5a6; font-size: 13px; margin: 6px 0 0; }
+    .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+    .card { background: rgba(44,62,80,0.6); border-radius: 10px; padding: 14px 10px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+    .card-label { font-size: 10px; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 6px; }
+    .card-value { font-size: 20px; font-weight: 700; margin: 6px 0 0; }
+    .card-sub { font-size: 10.5px; color: #7f8c8d; margin: 3px 0 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .panel { background: rgba(44,62,80,0.6); border-radius: 12px; padding: 18px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+    .panel-title { font-size: 14px; font-weight: 700; color: #ecf0f1; margin: 0 0 14px; border-bottom: 2px solid rgba(236,240,241,0.2); padding-bottom: 8px; }
+    .pie-section { display: flex; align-items: center; gap: 16px; }
+    .pie-chart { flex: 0 0 180px; height: 180px; }
+    .pie-legend { flex: 1; }
+    .legend-item { margin-bottom: 10px; }
+    .legend-label { display: flex; justify-content: space-between; font-size: 11px; color: #bdc3c7; margin-bottom: 3px; }
+    .legend-value { font-weight: 700; }
+    .progress-bar { height: 6px; border-radius: 3px; background: rgba(127,140,141,0.3); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; }
+    .chart-container { height: 220px; margin-top: 10px; position: relative; }
+    table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    thead tr { background: rgba(52,73,94,0.5); }
+    th { padding: 8px 6px; border-bottom: 2px solid rgba(127,140,141,0.3); color: #bdc3c7; font-weight: 600; text-align: center; font-size: 10.5px; }
+    thead tr:first-child th { border-right: none !important; }
+    thead tr:nth-child(2) th:nth-child(2), thead tr:nth-child(2) th:nth-child(6) { border-right: 2px solid rgba(149,165,166,0.4); }
+    tbody td:nth-child(3), tfoot td:nth-child(3), tbody td:nth-child(7), tfoot td:nth-child(7) { border-right: 2px solid rgba(149,165,166,0.4); }
+    tbody tr { border-bottom: 1px solid rgba(127,140,141,0.2); }
+    tbody tr:nth-child(even) { background: rgba(52,73,94,0.2); }
+    tbody tr:nth-child(odd) { background: rgba(44,62,80,0.2); }
+    td { padding: 7px 6px; text-align: center; }
+    tfoot tr { background: rgba(52,73,94,0.5); }
+    tfoot td { padding: 9px 6px; font-weight: 700; }
+    .notice { background: rgba(243,156,18,0.1); border: 1px solid rgba(243,156,18,0.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 11px; color: #f39c12; line-height: 1.6; }
+    .delta { font-size: 9px; font-weight: 700; margin-left: 3px; }
+    .delta-up { color: #2ecc71; }
+    .delta-down { color: #e74c3c; }
+    .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .insight-card { display: flex; gap: 8px; align-items: flex-start; background: rgba(52,73,94,0.3); border-radius: 8px; padding: 10px; }
+    .insight-icon { font-size: 16px; }
+    .insight-text { font-size: 11px; color: #bdc3c7; line-height: 1.5; margin: 0; }
+    @media (max-width: 768px) { .cards { grid-template-columns: repeat(3,1fr); } .grid-2 { grid-template-columns: 1fr; } .insights { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏊 PAB 성인 수영 전체 등록 현황</h1>
+      <p>2026년 3월 13일 기준 · 매일반/단과반 · 장기/단기 분석 · 중복 제거 실제 인원</p>
+    </div>
+
+    <div class="notice">
+      ⚠️ <strong>장기/단기 분류 기준 (3월 기준)</strong> — <strong>단기 = 3월 만료</strong> &nbsp;|&nbsp; <strong>장기 = 4월 이후 만료</strong> &nbsp;|&nbsp; 2월 이전 만료자 제외<br>
+      3월 초 기준이므로 단기 비율(93.8%)이 높은 것은 대부분이 3/31 만료인 정상적인 현황입니다. &nbsp;|&nbsp; <strong style="color:#2ecc71;">3/9 대비 +2명 유지 (608 → 610)</strong>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">단순 합계</div>
+        <div class="card-value" style="color:#7f8c8d;">734명</div>
+        <div class="card-sub">중복 포함</div>
+      </div>
+      <div class="card">
+        <div class="card-label">실제 등록</div>
+        <div class="card-value" style="color:#ecf0f1;">610명</div>
+        <div class="card-sub">-124명 <span class="delta delta-up">▲2</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">매일반</div>
+        <div class="card-value" style="color:#9b59b6;">124명</div>
+        <div class="card-sub">20.3%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">단과반</div>
+        <div class="card-value" style="color:#16a085;">486명</div>
+        <div class="card-sub">79.7%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">장기 (4월+)</div>
+        <div class="card-value" style="color:#27ae60;">38명</div>
+        <div class="card-sub">6.2% <span class="delta delta-up">▲4</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">단기 (3월)</div>
+        <div class="card-value" style="color:#e74c3c;">572명</div>
+        <div class="card-sub">93.8%</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">📊 등록 유형별 구성</div>
+        <div class="pie-section">
+          <div class="pie-chart"><canvas id="pieType"></canvas></div>
+          <div class="pie-legend">
+            <div class="legend-item">
+              <div class="legend-label"><span>매일반 (중복)</span><span class="legend-value" style="color:#9b59b6;">124명 (20.3%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:20.3%;background:#9b59b6;"></div></div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label"><span>월수금 단과</span><span class="legend-value" style="color:#3498db;">229명 (37.5%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:37.5%;background:#3498db;"></div></div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label"><span>화목토 단과</span><span class="legend-value" style="color:#e67e22;">257명 (42.1%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:42.1%;background:#e67e22;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📅 등록 기간별 구성</div>
+        <div class="pie-section">
+          <div class="pie-chart"><canvas id="pieTerm"></canvas></div>
+          <div class="pie-legend">
+            <div class="legend-item">
+              <div class="legend-label"><span>장기 (4월 이후)</span><span class="legend-value" style="color:#27ae60;">38명 (6.2%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:6.2%;background:#27ae60;"></div></div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label"><span>단기 (3월)</span><span class="legend-value" style="color:#e74c3c;">572명 (93.8%)</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:93.8%;background:#e74c3c;"></div></div>
+            </div>
+            <div style="margin-top:12px;">
+              <p style="font-size:10.5px;color:#7f8c8d;line-height:1.5;margin:0;">💡 93.8%(572명)이 3/31 만료 — 월말 갱신 관리가 핵심</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">시간대별 매일반 / 단과반 구성</div>
+        <div class="chart-container"><canvas id="chartType"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">시간대별 장기 / 단기 구성 (실제 인원)</div>
+        <div class="chart-container"><canvas id="chartTerm"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">📋 시간대별 상세 분석</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2" style="vertical-align:middle;">시간</th>
+              <th colspan="2" style="border-bottom:none;">등록 현황</th>
+              <th colspan="4" style="border-bottom:none;">유형별 구성</th>
+              <th colspan="2" style="border-bottom:none;">기간별 구성</th>
+            </tr>
+            <tr>
+              <th>월수금</th><th>화목토</th>
+              <th>매일반</th><th>월수금 단과</th><th>화목토 단과</th><th>실제 인원</th>
+              <th>장기</th><th>단기</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+          <tfoot>
+            <tr>
+              <td style="color:#ecf0f1;">합계</td>
+              <td style="color:#3498db;">353</td><td style="color:#e67e22;">381</td>
+              <td style="color:#9b59b6;">124</td><td style="color:#95a5a6;">229</td><td style="color:#95a5a6;">257</td>
+              <td style="color:#ecf0f1;">610</td>
+              <td style="color:#27ae60;">38</td><td style="color:#e74c3c;">572</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-title">💡 핵심 인사이트</div>
+      <div class="insights">
+        <div class="insight-card">
+          <span class="insight-icon">📊</span>
+          <p class="insight-text">단순 합계 734명 → 실제 610명 (중복 124명 제거, -16.9%) · 3/9 대비 <strong style="color:#2ecc71;">+2명</strong> 안정 유지</p>
+        </div>
+        <div class="insight-card">
+          <span class="insight-icon">👥</span>
+          <p class="insight-text">매일반 비율 20.3% — 20~22% 구간 안정 유지. 오전 6시(27%) vs 저녁 20시(6%) 차이 뚜렷</p>
+        </div>
+        <div class="insight-card">
+          <span class="insight-icon">🌿</span>
+          <p class="insight-text">장기 4월+ 38명으로 3/9(34명) 대비 <strong style="color:#2ecc71;">+4명</strong> — 4월 연속 등록자 소폭 증가</p>
+        </div>
+        <div class="insight-card">
+          <span class="insight-icon">🌙</span>
+          <p class="insight-text">20:00 시간대 111명 최대 규모 유지 — 화목토 단과반(61명) · 월수금 단과반(43명) 집중</p>
+        </div>
+        <div class="insight-card">
+          <span class="insight-icon">🌅</span>
+          <p class="insight-text">19:00~21:00 저녁 3개 시간대 278명 (전체 45.6%) — 저녁 수요 집중 지속</p>
+        </div>
+        <div class="insight-card">
+          <span class="insight-icon">⚠️</span>
+          <p class="insight-text">3월 만료 572명 — 월말 갱신 집중 안내 필요. 20:00(111명)·19:00(91명)·21:00(76명) 최우선 관리</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const timeData = [
+      { time:"6:00",  mwf:45, tts:53, daily:21, mwfOnly:24, ttsOnly:32, unique:77,  uLong:3,  uShort:74  },
+      { time:"7:00",  mwf:45, tts:42, daily:20, mwfOnly:25, ttsOnly:22, unique:67,  uLong:7,  uShort:60  },
+      { time:"8:00",  mwf:22, tts:24, daily:10, mwfOnly:12, ttsOnly:14, unique:36,  uLong:3,  uShort:33  },
+      { time:"9:00",  mwf:35, tts:23, daily:13, mwfOnly:22, ttsOnly:10, unique:45,  uLong:6,  uShort:39  },
+      { time:"10:00", mwf:32, tts:22, daily:11, mwfOnly:21, ttsOnly:11, unique:43,  uLong:4,  uShort:39  },
+      { time:"10:50", mwf:12, tts:10, daily:5,  mwfOnly:7,  ttsOnly:5,  unique:17,  uLong:1,  uShort:16  },
+      { time:"14:00", mwf:27, tts:36, daily:16, mwfOnly:11, ttsOnly:20, unique:47,  uLong:4,  uShort:43  },
+      { time:"19:00", mwf:47, tts:57, daily:13, mwfOnly:34, ttsOnly:44, unique:91,  uLong:2,  uShort:89  },
+      { time:"20:00", mwf:50, tts:68, daily:7,  mwfOnly:43, ttsOnly:61, unique:111, uLong:5,  uShort:106 },
+      { time:"21:00", mwf:38, tts:46, daily:8,  mwfOnly:30, ttsOnly:38, unique:76,  uLong:3,  uShort:73  },
+    ];
+
+    const centerTextPlugin = {
+      id: 'centerText',
+      beforeDraw: (chart) => {
+        if (chart.config.options.plugins.centerText) {
+          const { ctx, chartArea: { width, height } } = chart;
+          ctx.save(); ctx.font = 'bold 20px Segoe UI'; ctx.fillStyle = '#ecf0f1';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(chart.config.options.plugins.centerText.text, width/2, height/2);
+          ctx.restore();
+        }
+      }
+    };
+    Chart.register(centerTextPlugin);
+
+    const tbody = document.getElementById('tableBody');
+    timeData.forEach(d => {
+      tbody.innerHTML += `<tr>
+        <td style="font-weight:700;color:#ecf0f1;">${d.time}</td>
+        <td style="color:#3498db;font-weight:600;">${d.mwf}</td>
+        <td style="color:#e67e22;font-weight:600;">${d.tts}</td>
+        <td style="color:#9b59b6;font-weight:600;">${d.daily}</td>
+        <td style="color:#95a5a6;">${d.mwfOnly}</td>
+        <td style="color:#95a5a6;">${d.ttsOnly}</td>
+        <td style="font-weight:700;">${d.unique}</td>
+        <td style="color:#27ae60;font-weight:600;">${d.uLong}</td>
+        <td style="color:#e74c3c;font-weight:600;">${d.uShort}</td>
+      </tr>`;
+    });
+
+    const commonOptions = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#95a5a6', font: { size: 10 } } },
+        tooltip: { backgroundColor: '#34495e', titleColor: '#ecf0f1', bodyColor: '#ecf0f1', borderColor: '#7f8c8d', borderWidth: 1 }
+      },
+      scales: {
+        x: { ticks: { color: '#95a5a6', font: { size: 11 } }, grid: { color: 'rgba(149,165,166,0.1)' } },
+        y: { ticks: { color: '#95a5a6', font: { size: 10 } }, grid: { color: 'rgba(149,165,166,0.1)' } }
+      }
+    };
+
+    new Chart(document.getElementById('pieType'), {
+      type: 'doughnut',
+      data: { labels: ['매일반','월수금 단과','화목토 단과'], datasets: [{ data: [124,229,257], backgroundColor: ['#9b59b6','#3498db','#e67e22'] }] },
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins: { legend:{display:false}, tooltip:{backgroundColor:'#34495e',titleColor:'#ecf0f1',bodyColor:'#ecf0f1'},
+          centerText:{text:'610명'},
+          datalabels: { color:'#fff', font:{size:14,weight:'bold'},
+            formatter:(v,ctx) => { const t=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0); return ((v/t)*100).toFixed(1)+'%'; },
+            anchor:'center', align:'center' } } }
+    });
+
+    new Chart(document.getElementById('pieTerm'), {
+      type: 'doughnut',
+      data: { labels: ['장기','단기'], datasets: [{ data: [38,572], backgroundColor: ['#27ae60','#e74c3c'] }] },
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins: { legend:{display:false}, tooltip:{backgroundColor:'#34495e',titleColor:'#ecf0f1',bodyColor:'#ecf0f1'},
+          centerText:{text:'610명'},
+          datalabels: { color:'#fff', font:{size:14,weight:'bold'},
+            formatter:(v,ctx) => { const t=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0); return ((v/t)*100).toFixed(1)+'%'; },
+            anchor:'center', align:'center' } } }
+    });
+
+    new Chart(document.getElementById('chartType'), {
+      type: 'bar',
+      data: { labels: timeData.map(d=>d.time), datasets: [
+        { label:'매일반', data:timeData.map(d=>d.daily), backgroundColor:'#9b59b6', stack:'a' },
+        { label:'월수금 단과', data:timeData.map(d=>d.mwfOnly), backgroundColor:'#3498db', stack:'a' },
+        { label:'화목토 단과', data:timeData.map(d=>d.ttsOnly), backgroundColor:'#e67e22', stack:'a' }
+      ]},
+      options: { ...commonOptions, plugins: { ...commonOptions.plugins,
+        datalabels: { color:'#fff', font:{size:10,weight:'bold'},
+          formatter:(v,ctx) => { const t=timeData[ctx.dataIndex].unique; const p=((v/t)*100).toFixed(0); return v>0&&p>=5?p+'%':''; } } } }
+    });
+
+    new Chart(document.getElementById('chartTerm'), {
+      type: 'bar',
+      data: { labels: timeData.map(d=>d.time), datasets: [
+        { label:'장기 (4월+)', data:timeData.map(d=>d.uLong), backgroundColor:'#27ae60', stack:'a' },
+        { label:'단기 (3월)', data:timeData.map(d=>d.uShort), backgroundColor:'#e74c3c', stack:'a' }
+      ]},
+      options: { ...commonOptions, plugins: { ...commonOptions.plugins,
+        datalabels: { color:'#fff', font:{size:10,weight:'bold'},
+          formatter:(v,ctx) => { const t=timeData[ctx.dataIndex].unique; const p=((v/t)*100).toFixed(0); return v>0&&p>=5?p+'%':''; } } } }
+    });
+  </script>
+</body>
+</html>
